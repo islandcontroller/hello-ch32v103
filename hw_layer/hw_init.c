@@ -10,6 +10,7 @@
 
 /*- Header files -------------------------------------------------------------*/
 #include <string.h>
+#include "ch32v10x.h"
 #include "hw_stk.h"
 #include "hw_gpio.h"
 #include "hw_usart1.h"
