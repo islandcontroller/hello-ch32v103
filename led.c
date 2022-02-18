@@ -1,6 +1,6 @@
 /*!****************************************************************************
  * @file
- * led.h
+ * led.c
  *
  * @brief
  * Breathing animation using PWM on TIM3 Channel 1
@@ -41,7 +41,7 @@ void vInitLed(void)
 {
   bCountDirUp = true;
   uiBrightness = 0;
-  ulLastChange = ulGetTicks();
+  ulLastChange = STK_GetValueLow();
 }
 
 /*!****************************************************************************
@@ -53,7 +53,7 @@ void vInitLed(void)
 void vPollLed(void)
 {
   /* Early exit until minimum interval is reached         */
-  uint32_t ulNow = ulGetTicks();
+  uint32_t ulNow = STK_GetValueLow();
   if (ulNow - ulLastChange < LED_TIME_INTER)
   {
     return;

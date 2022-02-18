@@ -6,6 +6,7 @@
  * Low-level SysTick configuration
  *
  * @date  17.02.2022
+ * @date  18.02.2022  Modified STK access functions
  ******************************************************************************/
 
 /*- Header files -------------------------------------------------------------*/
@@ -17,19 +18,9 @@
  * Enable SysTick-Timer
  *
  * @date  17.02.2022
+ * @date  18.02.2022  Modified access functions
  ******************************************************************************/
 void vInitHW_STK(void)
 {
-  SysTick->CTLR |= 1UL;
-}
-
-/*!****************************************************************************
- * @brief
- * Get lower 32 bits of SysTick counter value
- *
- * @date  17.02.2022
- ******************************************************************************/
-uint32_t ulGetTicks(void)
-{
-  return *(const volatile uint32_t*)&SysTick->CNTL0;
+  STK_Cmd(ENABLE);
 }

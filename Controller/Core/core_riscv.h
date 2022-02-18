@@ -110,22 +110,42 @@ typedef struct{
 typedef struct
 {
   __IO uint32_t CTLR;
-  __IO uint8_t CNTL0;
-  __IO uint8_t CNTL1;
-  __IO uint8_t CNTL2;
-  __IO uint8_t CNTL3;
-  __IO uint8_t CNTH0;
-  __IO uint8_t CNTH1;
-  __IO uint8_t CNTH2;
-  __IO uint8_t CNTH3;
-  __IO uint8_t CMPLR0;
-  __IO uint8_t CMPLR1;
-  __IO uint8_t CMPLR2;
-  __IO uint8_t CMPLR3;
-  __IO uint8_t CMPHR0;
-  __IO uint8_t CMPHR1;
-  __IO uint8_t CMPHR2;
-  __IO uint8_t CMPHR3;
+  union {
+    struct __attribute__((packed)) {
+      __IO uint8_t CNTL0;
+      __IO uint8_t CNTL1;
+      __IO uint8_t CNTL2;
+      __IO uint8_t CNTL3;
+    };
+    __I uint32_t CNTL;
+  };
+  union {
+    struct __attribute__((packed)) {
+      __IO uint8_t CNTH0;
+      __IO uint8_t CNTH1;
+      __IO uint8_t CNTH2;
+      __IO uint8_t CNTH3;
+    };
+    __I uint32_t CNTH;
+  };
+  union {
+    struct __attribute__((packed)) {
+      __IO uint8_t CMPLR0;
+      __IO uint8_t CMPLR1;
+      __IO uint8_t CMPLR2;
+      __IO uint8_t CMPLR3;
+    };
+    __I uint32_t CMPLR;
+  };
+  union {
+    struct __attribute__((packed)) {
+      __IO uint8_t CMPHR0;
+      __IO uint8_t CMPHR1;
+      __IO uint8_t CMPHR2;
+      __IO uint8_t CMPHR3;
+    };
+    __I uint32_t CMPHR;
+  };
 }SysTick_Type;
 
 
@@ -136,6 +156,8 @@ typedef struct
 #define	NVIC_KEY3				((uint32_t)0xBEEF0000)
 
 #define SysTick         ((SysTick_Type *) 0xE000F000)
+#define STK             SysTick
+
 
 /* ##########################   NVIC functions  #################################### */
 
@@ -315,6 +337,141 @@ RV_STATIC_INLINE void NVIC_INTNestCfg(FunctionalState NewState)
   {
   	NVIC->CFGR = NVIC_KEY1|(1<<1);
   }
+}
+
+/* ########################### SysTick Timer ################################ */
+/* Bit definitions for STK register                                           */
+#define STK_CTLR_STE                  0x00000001UL  /* Counter Enable         */
+
+/* Access functions for 8-bit write registers                                 */
+#define STK_REG_WRITE8(reg,val32) {     \
+  STK->reg##3 = (uint8_t)(value >> 24); \
+  STK->reg##2 = (uint8_t)(value >> 16); \
+  STK->reg##1 = (uint8_t)(value >>  8); \
+  STK->reg##0 = (uint8_t)(value >>  0); \
+}
+
+/*!****************************************************************************
+ * @brief
+ * Set SysTick counter state
+ *
+ * @param[in] state       Enable or disable counter
+ * @date  18.02.2022
+ ******************************************************************************/
+RV_STATIC_FORCE_INLINE void STK_Cmd(FunctionalState state)
+{
+  if (state != DISABLE)
+  {
+    STK->CTLR |= STK_CTLR_STE;
+  }
+  else
+  {
+    STK->CTLR &= ~STK_CTLR_STE;
+  }
+}
+
+/*!****************************************************************************
+ * @brief
+ * Set SysTick counter low word
+ *
+ * Byte-wise copy into STK_CNTL register
+ *
+ * @param[in] value       Counter value, low word
+ * @date  18.02.2022
+ ******************************************************************************/
+RV_STATIC_FORCE_INLINE void STK_SetValueLow(uint32_t value)
+{
+  STK_REG_WRITE8(CNTL, value);
+}
+
+/*!****************************************************************************
+ * @brief
+ * Set SysTick counter high word
+ *
+ * Byte-wise copy into STK_CNTH register
+ *
+ * @param[in] value       Counter value, high word
+ * @date  18.02.2022
+ ******************************************************************************/
+RV_STATIC_FORCE_INLINE void STK_SetValueHigh(uint32_t value)
+{
+  STK_REG_WRITE8(CNTH, value);
+}
+
+/*!****************************************************************************
+ * @brief
+ * Set SysTick counter value (doubleword)
+ *
+ * @param[in] value       64-bit counter value
+ * @date  18.02.2022
+ ******************************************************************************/
+RV_STATIC_FORCE_INLINE void STK_SetValue(uint64_t value)
+{
+  STK_SetValueHigh((uint32_t)(value >> 32));
+  STK_SetValueLow((uint32_t)value);
+}
+
+/*!****************************************************************************
+ * @brief
+ * Get SysTick counter value, low word
+ *
+ * @return  (uint32_t)  Counter value, low word
+ * @date  18.02.2022
+ ******************************************************************************/
+RV_STATIC_FORCE_INLINE uint32_t STK_GetValueLow(void)
+{
+  return STK->CNTL;
+}
+
+/*!****************************************************************************
+ * @brief
+ * Get 64 bit SysTick counter value
+ *
+ * Low and high words may be out of sync
+ *
+ * @return  (uint64_t)  Counter value
+ * @date  18.02.2022
+ ******************************************************************************/
+RV_STATIC_FORCE_INLINE uint64_t STK_GetValue(void)
+{
+  return ((uint64_t)STK->CNTH << 32) | (uint64_t)STK->CNTL;
+}
+
+/*!****************************************************************************
+ * @brief
+ * Set SysTick compare value low word
+ *
+ * @param[in] value       Compare value, low word
+ * @date  18.02.2022
+ ******************************************************************************/
+RV_STATIC_FORCE_INLINE void STK_SetCompareLow(uint32_t value)
+{
+  STK_REG_WRITE8(CMPLR, value);
+}
+
+/*!****************************************************************************
+ * @brief
+ * Set SysTick compare value high word
+ *
+ * @param[in] value       Compare value, high word
+ * @date  18.02.2022
+ ******************************************************************************/
+RV_STATIC_FORCE_INLINE void STK_SetCompareHigh(uint32_t value)
+{
+  STK_REG_WRITE8(CMPHR, value);
+}
+
+/*!****************************************************************************
+ * @brief
+ * Set SysTick compare value (doubleword)
+ *
+ * @param[in] value       64-bit compare value
+ * @date  18.02.2022
+ ******************************************************************************/
+RV_STATIC_FORCE_INLINE void STK_SetCompare(uint64_t value)
+{
+  STK_SetCompareHigh((uint32_t)(value >> 32));
+  STK_SetCompareLow((uint32_t)value);
 }
 
 /* ###################### Machine Register Access ########################### */
