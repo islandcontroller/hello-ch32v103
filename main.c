@@ -10,6 +10,7 @@
  *  - Polling-mode serial I/O on USART1 (connected to WCH-Link VCP)
  *  - SysTick enabled and using empty dummy interrupt handler
  *  - TIM3 PWM output to LED
+ *  - ADC1 internal temperature sensor and Vrefint readout
  * All project files are also available online at:
  *  https://github.com/islandcontroller/hello-ch32v103
  *
@@ -18,6 +19,7 @@
  * @date  17.02.2022  Added clocks, ESig information printout
  * @date  17.02.2022  Added LED animation
  * @date  23.02.2022  Added remote echo and serial input commands processing
+ * @date  24.02.2022  Added temperature sensor and Vrefint info printout
  ******************************************************************************/
 
 /*- Header files -------------------------------------------------------------*/
@@ -25,6 +27,7 @@
 #include <string.h>
 #include "ch32v10x.h"
 #include "hw_init.h"
+#include "hw_adc.h"
 #include "dbgser.h"
 #include "led.h"
 
@@ -173,10 +176,34 @@ static void vPrintEsigInfo(void)
 
 /*!****************************************************************************
  * @brief
+ * Print analog inputs info
+ *
+ * @date  24.02.2022
+ ******************************************************************************/
+static void vPrintAnalogInfo(void)
+{
+  char acLine[LINE_BUF_LEN];
+
+  /* Temperature sensor values                            */
+  int32_t lVoltageTS = uiHW_GetAdcConversionValue_mV(ADC_Channel_TempSensor);
+  int32_t lTemperature = TempSensor_Volt_To_Temper(lVoltageTS);
+  sprintf(acLine, "Temp sensor: %ld mV, %ld degC", lVoltageTS, lTemperature);
+  vPrintDbgSer(acLine);
+  if ((lTemperature < 10) || (lTemperature > 50)) vPrintDbgSer(" (invalid?)");
+
+  /* Internal voltage reference                           */
+  int32_t lVoltageVref = uiHW_GetAdcConversionValue_mV(ADC_Channel_Vrefint);
+  sprintf(acLine, "\r\nVrefint: %ld mV\r\n", lVoltageVref);
+  vPrintDbgSer(acLine);
+}
+
+/*!****************************************************************************
+ * @brief
  * Serial input processing
  *
  * @date  23.02.2022
  * @date  24.02.2022  Changed NVIC naming convention
+ * @date  24.02.2022  Added analog inputs readout command; modified help text
  ******************************************************************************/
 static void vPollSerial(void)
 {
@@ -186,6 +213,7 @@ static void vPollSerial(void)
   /* Fetch character and print remote echo                */
   char c = cGetCharDbgSer();
   vPutCharDbgSer(c);
+  vPrintDbgSer("\r\n");
 
   /* Process command                                      */
   switch (c)
@@ -193,10 +221,16 @@ static void vPollSerial(void)
     case '?':
       /* Show available commands                          */
       vPrintDbgSer(
-        "\r\nAvailable Commands:\r\n"
-        "  ?    Show help\r\n"
+        "Available Commands:\r\n"
+        "  ?    Show this help\r\n"
+        "  a    Print analog inputs info\r\n"
         "  r    Reboot system\r\n"
       );
+      break;
+
+    case 'a':
+      /* Print analog inputs info                         */
+      vPrintAnalogInfo();
       break;
 
     case 'r':
@@ -205,8 +239,11 @@ static void vPollSerial(void)
       break;
 
     default:
-      ;
+      vPrintDbgSer("Unknown command. Press \"?\" to show available commands.\r\n");
   }
+
+  /* Input prompt                                         */
+  vPutCharDbgSer('>');
 }
 
 
@@ -219,6 +256,7 @@ static void vPollSerial(void)
  * @date  17.02.2022  Added clocks, ESig information printout
  * @date  17.02.2022  Added LED animation
  * @date  23.02.2022  Added serial input processing
+ * @date  24.02.2022  Added help prompt
  ******************************************************************************/
 int main(void)
 {
@@ -246,6 +284,7 @@ int main(void)
   vPrintSysCoreClk();
   vPrintDbgSer("\r\n");
   vPrintEsigInfo();
+  vPrintDbgSer("\r\nPress \"?\" to show available commands.\r\n>");
 
   /* Main program loop                                    */
   while (1)
