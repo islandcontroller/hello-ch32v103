@@ -8,6 +8,7 @@ This project contains a simple set of modules to get the MCU running in a minima
   - Serial I/O on USART1 (connected to WCH-Link VCP)
   - SysTick enabled and using empty dummy interrupt handler
   - TIM3 Channel 1 configured for PWM output to LED
+  - ADC1 internal temperature sensor and Vrefint readout
 
 ## Requirements
 
@@ -17,9 +18,11 @@ This project contains a simple set of modules to get the MCU running in a minima
 
 ## Usage
 
-* Load this project in **MounRiver Studio** and run the provided `.launch` file from Debug Configurations.
+* Load this project in **MounRiver Studio** and build the executable
 * Open a serial terminal on the WCH-Link programmer's VCP (**115200 Baud, 8N1**)
-* Flash the firmware to the MCU and resume program execution
+* Flash the firmware to the MCU using the provided `.launch` script
+* Resume execution once breakpoint in `main()` is reached
+* Press `?` in the serial terminal to show available commands
 
 ## Licensing
 
