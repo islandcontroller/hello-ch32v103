@@ -176,8 +176,9 @@ static void vPrintEsigInfo(void)
  * Serial input processing
  *
  * @date  23.02.2022
+ * @date  24.02.2022  Changed NVIC naming convention
  ******************************************************************************/
-void vPollSerial(void)
+static void vPollSerial(void)
 {
   /* Early exit, if no data is available                  */
   if (!bIsDbgSerAvailable()) return;
@@ -200,7 +201,7 @@ void vPollSerial(void)
 
     case 'r':
       /* Reboot command                                   */
-      NVIC_SystemReset();
+      PFIC_SystemReset();
       break;
 
     default:
@@ -232,7 +233,7 @@ int main(void)
     "\r\n"
     "      ##    ######                                \r\n"
     "     ##  ##                                       \r\n"
-    "    ##  ##                              17.02.2022\r\n"
+    "    ##  ##                                        \r\n"
     "   ##    ######  ######                  @islandc_\r\n"
     "--------------------------------------------------\r\n"
     " MCU:  WCH CH32V103R8T6                           \r\n"

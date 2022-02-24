@@ -1,33 +1,14 @@
 /********************************** (C) COPYRIGHT  *******************************
-* File Name          : core_riscv.h
-* Author             : WCH
-* Version            : V1.0.0
-* Date               : 2020/04/30
-* Description        : RISC-V Core Peripheral Access Layer Header File
-*******************************************************************************/
+ * File Name          : core_riscv.h
+ * Author             : WCH
+ * Version            : V1.0.0
+ * Date               : 2020/04/30
+ * Description        : RISC-V Core Peripheral Access Layer Header File
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ *******************************************************************************/
 #ifndef __CORE_RISCV_H__
 #define __CORE_RISCV_H__
-
-/* default headers */
-#include <stdint.h>
-
-/* define compiler specific symbols */
-#if defined ( __CC_ARM   )
-  #define __ASM            __asm              /*!< asm keyword for ARM Compiler          */
-  #define __INLINE         __inline           /*!< inline keyword for ARM Compiler       */
-
-#elif defined ( __ICCARM__ )
-  #define __ASM           __asm               /*!< asm keyword for IAR Compiler          */
-  #define __INLINE        inline              /*!< inline keyword for IAR Compiler. Only avaiable in High optimization mode! */
-
-#elif defined   (  __GNUC__  )
-  #define __ASM            __asm              /*!< asm keyword for GNU Compiler          */
-  #define __INLINE         inline             /*!< inline keyword for GNU Compiler       */
-
-#elif defined   (  __TASKING__  )
-  #define __ASM            __asm              /*!< asm keyword for TASKING Compiler      */
-  #define __INLINE         inline             /*!< inline keyword for TASKING Compiler   */
-#endif
 
 /* IO definitions */
 #ifdef __cplusplus
@@ -148,207 +129,216 @@ typedef struct
   };
 }SysTick_Type;
 
-
-#define PFIC            ((PFIC_Type *) 0xE000E000 )
-#define NVIC            PFIC
-#define NVIC_KEY1       ((uint32_t)0xFA050000)
-#define	NVIC_KEY2				((uint32_t)0xBCAF0000)
-#define	NVIC_KEY3				((uint32_t)0xBEEF0000)
+#define PFIC            ((PFIC_Type *) 0xE000E000)
+#define PFIC_KEY1       ((uint32_t)0xFA050000)
+#define PFIC_KEY2       ((uint32_t)0xBCAF0000)
+#define PFIC_KEY3       ((uint32_t)0xBEEF0000)
 
 #define SysTick         ((SysTick_Type *) 0xE000F000)
-#define STK             SysTick
 
 
-/* ##########################   NVIC functions  #################################### */
-
-/*******************************************************************************
-* Function Name  : NVIC_EnableIRQ
-* Description    : Enable Interrupt
-* Input          : IRQn: Interrupt Numbers
-* Return         : None
-*******************************************************************************/
-RV_STATIC_INLINE void NVIC_EnableIRQ(IRQn_Type IRQn){
-  NVIC->IENR[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F));
+/* ################ Programmable Fast Interrupt Controller ################## */
+/*********************************************************************
+ * @fn      PFIC_EnableIRQ
+ *
+ * @brief   Enable Interrupt
+ *
+ * @param   IRQn: Interrupt Numbers
+ *
+ * @return  none
+ */
+RV_STATIC_INLINE void PFIC_EnableIRQ(IRQn_Type IRQn){
+  PFIC->IENR[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F));
 }
 
-/*******************************************************************************
-* Function Name  : NVIC_DisableIRQ
-* Description    : Disable Interrupt
-* Input          : IRQn: Interrupt Numbers
-* Return         : None
-*******************************************************************************/
-RV_STATIC_INLINE void NVIC_DisableIRQ(IRQn_Type IRQn)
+/*********************************************************************
+ * @fn      PFIC_DisableIRQ
+ *
+ * @brief   Disable Interrupt
+ *
+ * @param   IRQn: Interrupt Numbers
+ *
+ * @return  none
+ */
+RV_STATIC_INLINE void PFIC_DisableIRQ(IRQn_Type IRQn)
 {
-  NVIC->IRER[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F));
+  uint32_t t;
+
+  t = PFIC->ITHRESDR;
+  PFIC->ITHRESDR = 0x10;
+  PFIC->IRER[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F));
+  PFIC->ITHRESDR = t;
 }
 
-/*******************************************************************************
-* Function Name  : NVIC_GetStatusIRQ
-* Description    : Get Interrupt Enable State
-* Input          : IRQn: Interrupt Numbers
-* Return         : 1: Interrupt Enable
-*                  0: Interrupt Disable
-*******************************************************************************/
-RV_STATIC_INLINE uint32_t NVIC_GetStatusIRQ(IRQn_Type IRQn)
+/*********************************************************************
+ * @fn      PFIC_GetStatusIRQ
+ *
+ * @brief   Get Interrupt Enable State
+ *
+ * @param   IRQn: Interrupt Numbers
+ *
+ * @return  1 - Interrupt Enable
+ *          0 - Interrupt Disable
+ */
+RV_STATIC_INLINE uint32_t PFIC_GetStatusIRQ(IRQn_Type IRQn)
 {
-  return((uint32_t) ((NVIC->ISR[(uint32_t)(IRQn) >> 5] & (1 << ((uint32_t)(IRQn) & 0x1F)))?1:0));
+  return((uint32_t) ((PFIC->ISR[(uint32_t)(IRQn) >> 5] & (1 << ((uint32_t)(IRQn) & 0x1F)))?1:0));
 }
 
-/*******************************************************************************
-* Function Name  : NVIC_GetPendingIRQ
-* Description    : Get Interrupt Pending State
-* Input          : IRQn: Interrupt Numbers
-* Return         : 1: Interrupt Pending Enable
-*                  0: Interrupt Pending Disable
-*******************************************************************************/
-RV_STATIC_INLINE uint32_t NVIC_GetPendingIRQ(IRQn_Type IRQn)
+/*********************************************************************
+ * @fn      PFIC_GetPendingIRQ
+ *
+ * @brief   Get Interrupt Pending State
+ *
+ * @param   IRQn: Interrupt Numbers
+ *
+ * @return  1 - Interrupt Pending Enable
+ *          0 - Interrupt Pending Disable
+ */
+RV_STATIC_INLINE uint32_t PFIC_GetPendingIRQ(IRQn_Type IRQn)
 {
-  return((uint32_t) ((NVIC->IPR[(uint32_t)(IRQn) >> 5] & (1 << ((uint32_t)(IRQn) & 0x1F)))?1:0));
+  return((uint32_t) ((PFIC->IPR[(uint32_t)(IRQn) >> 5] & (1 << ((uint32_t)(IRQn) & 0x1F)))?1:0));
 }
 
-/*******************************************************************************
-* Function Name  : NVIC_SetPendingIRQ
-* Description    : Set Interrupt Pending
-* Input          : IRQn: Interrupt Numbers
-* Return         : None
-*******************************************************************************/
-RV_STATIC_INLINE void NVIC_SetPendingIRQ(IRQn_Type IRQn)
+/*********************************************************************
+ * @fn      PFIC_SetPendingIRQ
+ *
+ * @brief   Set Interrupt Pending
+ *
+ * @param   IRQn: Interrupt Numbers
+ *
+ * @return  None
+ */
+RV_STATIC_INLINE void PFIC_SetPendingIRQ(IRQn_Type IRQn)
 {
-  NVIC->IPSR[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F));
+  PFIC->IPSR[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F));
 }
 
-/*******************************************************************************
-* Function Name  : NVIC_ClearPendingIRQ
-* Description    : Clear Interrupt Pending
-* Input          : IRQn: Interrupt Numbers
-* Return         : None
-*******************************************************************************/
-RV_STATIC_INLINE void NVIC_ClearPendingIRQ(IRQn_Type IRQn)
+/*********************************************************************
+ * @fn      PFIC_ClearPendingIRQ
+ *
+ * @brief   Clear Interrupt Pending
+ *
+ * @param   IRQn: Interrupt Numbers
+ *
+ * @return  None
+ */
+RV_STATIC_INLINE void PFIC_ClearPendingIRQ(IRQn_Type IRQn)
 {
-  NVIC->IPRR[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F));
+  PFIC->IPRR[((uint32_t)(IRQn) >> 5)] = (1 << ((uint32_t)(IRQn) & 0x1F));
 }
 
-/*******************************************************************************
-* Function Name  : NVIC_GetActive
-* Description    : Get Interrupt Active State
-* Input          : IRQn: Interrupt Numbers
-* Return         : 1: Interrupt Active
-*                  0: Interrupt No Active
-*******************************************************************************/
-RV_STATIC_INLINE uint32_t NVIC_GetActive(IRQn_Type IRQn)
+/*********************************************************************
+ * @fn      PFIC_GetActive
+ *
+ * @brief   Get Interrupt Active State
+ *
+ * @param   IRQn: Interrupt Numbers
+ *
+ * @return  1 - Interrupt Active
+ *          0 - Interrupt No Active
+ */
+RV_STATIC_INLINE uint32_t PFIC_GetActive(IRQn_Type IRQn)
 {
-  return((uint32_t)((NVIC->IACTR[(uint32_t)(IRQn) >> 5] & (1 << ((uint32_t)(IRQn) & 0x1F)))?1:0));
+  return((uint32_t)((PFIC->IACTR[(uint32_t)(IRQn) >> 5] & (1 << ((uint32_t)(IRQn) & 0x1F)))?1:0));
 }
 
-/*******************************************************************************
-* Function Name  : NVIC_SetPriority
-* Description    : Set Interrupt Priority
-* Input          : IRQn: Interrupt Numbers
-*                  priority: bit7:pre-emption priority
-*                            bit6-bit4: subpriority
-* Return         : None
-*******************************************************************************/
-RV_STATIC_INLINE void NVIC_SetPriority(IRQn_Type IRQn, uint8_t priority)
+/*********************************************************************
+ * @fn      PFIC_SetPriority
+ *
+ * @brief   Set Interrupt Priority
+ *
+ * @param   IRQn - Interrupt Numbers
+ *          priority -
+ *              bit7 - pre-emption priority
+ *              bit6~bit4 - subpriority
+ * @return  None
+ */
+RV_STATIC_INLINE void PFIC_SetPriority(IRQn_Type IRQn, uint8_t priority)
 {
-  NVIC->IPRIOR[(uint32_t)(IRQn)] = priority;
+  PFIC->IPRIOR[(uint32_t)(IRQn)] = priority;
 }
 
-/*******************************************************************************
-* Function Name  : __WFI
-* Description    : Wait for Interrupt
-* Input          : None
-* Return         : None
-*******************************************************************************/
-__attribute__( ( always_inline ) ) RV_STATIC_INLINE void __WFI(void)
+/*********************************************************************
+ * @fn      PFIC_SetFastIRQ
+ *
+ * @brief   Set VTF Interrupt
+ *
+ * @param   add - VTF interrupt service function base address.
+ *          IRQn -Interrupt Numbers
+ *          num - VTF Interrupt Numbers
+ * @return  None
+ */
+RV_STATIC_INLINE void PFIC_SetFastIRQ(uint32_t addr, IRQn_Type IRQn, uint8_t num)
 {
-  NVIC->SCTLR &= ~(1<<3);	// wfi
-  asm volatile ("wfi");
-}
-
-/*******************************************************************************
-* Function Name  : __WFE
-* Description    : Wait for Events
-* Input          : None
-* Return         : None
-*******************************************************************************/
-__attribute__( ( always_inline ) ) RV_STATIC_INLINE void __WFE(void)
-{
-  NVIC->SCTLR |= (1<<3)|(1<<5);		// (wfi->wfe)+(__sev)
-  asm volatile ("wfi");
-  NVIC->SCTLR |= (1<<3);
-  asm volatile ("wfi");
-}
-
-/*******************************************************************************
-* Function Name  : NVIC_SetFastIRQ
-* Description    : Set Fast Interrupt
-* Input          : addr£ºFast interrupt service function base address.
-*                  IRQn£ºInterrupt Numbers
-*                  num£ºFast Interrupt Numbers
-* Return         : None
-*******************************************************************************/
-RV_STATIC_INLINE void NVIC_SetFastIRQ(uint32_t addr, IRQn_Type IRQn, uint8_t num){
   if(num > 3)  return ;
-  NVIC->FIBADDRR = addr;
-  NVIC->FIOFADDRR[num] = ((uint32_t)IRQn<<24)|(addr&0xfffff);
+  PFIC->FIBADDRR = addr;
+  PFIC->FIOFADDRR[num] = ((uint32_t)IRQn<<24)|(addr&0xfffff);
 }
 
-/*******************************************************************************
-* Function Name  : NVIC_SystemReset
-* Description    : Initiate a system reset request
-* Input          : None
-* Return         : None
-*******************************************************************************/
-RV_STATIC_INLINE void NVIC_SystemReset(void)
+/*********************************************************************
+ * @fn      PFIC_SystemReset
+ *
+ * @brief   Initiate a system reset request
+ *
+ * @return  None
+ */
+RV_STATIC_INLINE void PFIC_SystemReset(void)
 {
-  NVIC->CFGR = NVIC_KEY3|(1<<7);
+  PFIC->CFGR = PFIC_KEY3|(1<<7);
 }
 
-/*******************************************************************************
-* Function Name  : NVIC_HaltPushCfg
-* Description    : Enable Hardware Stack
-* Input          : NewState: DISABLE or ENABLE
-* Return         : None
-*******************************************************************************/
-RV_STATIC_INLINE void NVIC_HaltPushCfg(FunctionalState NewState)
+/*********************************************************************
+ * @fn      PFIC_HaltPushCfg
+ *
+ * @brief   Enable Hardware Stack
+ *
+ * @param   NewState - DISABLE or ENABLE
+
+ * @return  None
+ */
+RV_STATIC_INLINE void PFIC_HaltPushCfg(FunctionalState NewState)
 {
   if (NewState != DISABLE)
   {
-  	NVIC->CFGR = NVIC_KEY1;
+    PFIC->CFGR = PFIC_KEY1;
   }
   else{
-  	NVIC->CFGR = NVIC_KEY1|(1<<0);
+    PFIC->CFGR = PFIC_KEY1|(1<<0);
   }
 }
 
-/*******************************************************************************
-* Function Name  : NVIC_INTNestCfg
-* Description    : Enable Interrupt Nesting
-* Input          : NewState: DISABLE or ENABLE
-* Return         : None
-*******************************************************************************/
-RV_STATIC_INLINE void NVIC_INTNestCfg(FunctionalState NewState)
+/*********************************************************************
+ * @fn      PFIC_INTNestCfg
+ *
+ * @brief   Enable Interrupt Nesting
+ *
+ * @param   NewState - DISABLE or ENABLE
+
+ * @return  None
+ */
+RV_STATIC_INLINE void PFIC_INTNestCfg(FunctionalState NewState)
 {
   if (NewState != DISABLE)
   {
-  	NVIC->CFGR = NVIC_KEY1;
+    PFIC->CFGR = PFIC_KEY1;
   }
   else
   {
-  	NVIC->CFGR = NVIC_KEY1|(1<<1);
+    PFIC->CFGR = PFIC_KEY1|(1<<1);
   }
 }
 
 /* ########################### SysTick Timer ################################ */
-/* Bit definitions for STK register                                           */
-#define STK_CTLR_STE                  0x00000001UL  /* Counter Enable         */
+/* Bit definitions for SysTick register                                       */
+#define SYSTICK_CTLR_STE              0x00000001UL  /* Counter Enable         */
 
 /* Access functions for 8-bit write registers                                 */
-#define STK_REG_WRITE8(reg,val32) {     \
-  STK->reg##3 = (uint8_t)(value >> 24); \
-  STK->reg##2 = (uint8_t)(value >> 16); \
-  STK->reg##1 = (uint8_t)(value >>  8); \
-  STK->reg##0 = (uint8_t)(value >>  0); \
+#define SYSTICK_REG_WRITE8(reg,val32) {     \
+  SysTick->reg##3 = (uint8_t)(value >> 24); \
+  SysTick->reg##2 = (uint8_t)(value >> 16); \
+  SysTick->reg##1 = (uint8_t)(value >>  8); \
+  SysTick->reg##0 = (uint8_t)(value >>  0); \
 }
 
 /*!****************************************************************************
@@ -357,16 +347,17 @@ RV_STATIC_INLINE void NVIC_INTNestCfg(FunctionalState NewState)
  *
  * @param[in] state       Enable or disable counter
  * @date  18.02.2022
+ * @date  24.02.2022  Changed naming convention
  ******************************************************************************/
-RV_STATIC_FORCE_INLINE void STK_Cmd(FunctionalState state)
+RV_STATIC_FORCE_INLINE void SysTick_Cmd(FunctionalState state)
 {
   if (state != DISABLE)
   {
-    STK->CTLR |= STK_CTLR_STE;
+    SysTick->CTLR |= SYSTICK_CTLR_STE;
   }
   else
   {
-    STK->CTLR &= ~STK_CTLR_STE;
+    SysTick->CTLR &= ~SYSTICK_CTLR_STE;
   }
 }
 
@@ -374,28 +365,30 @@ RV_STATIC_FORCE_INLINE void STK_Cmd(FunctionalState state)
  * @brief
  * Set SysTick counter low word
  *
- * Byte-wise copy into STK_CNTL register
+ * Byte-wise copy into SysTick CNTL register
  *
  * @param[in] value       Counter value, low word
  * @date  18.02.2022
+ * @date  24.02.2022  Changed naming convention
  ******************************************************************************/
-RV_STATIC_FORCE_INLINE void STK_SetValueLow(uint32_t value)
+RV_STATIC_FORCE_INLINE void SysTick_SetValueLow(uint32_t value)
 {
-  STK_REG_WRITE8(CNTL, value);
+  SYSTICK_REG_WRITE8(CNTL, value);
 }
 
 /*!****************************************************************************
  * @brief
  * Set SysTick counter high word
  *
- * Byte-wise copy into STK_CNTH register
+ * Byte-wise copy into SysTick CNTH register
  *
  * @param[in] value       Counter value, high word
  * @date  18.02.2022
+ * @date  24.02.2022  Changed naming convention
  ******************************************************************************/
-RV_STATIC_FORCE_INLINE void STK_SetValueHigh(uint32_t value)
+RV_STATIC_FORCE_INLINE void SysTick_SetValueHigh(uint32_t value)
 {
-  STK_REG_WRITE8(CNTH, value);
+  SYSTICK_REG_WRITE8(CNTH, value);
 }
 
 /*!****************************************************************************
@@ -404,11 +397,12 @@ RV_STATIC_FORCE_INLINE void STK_SetValueHigh(uint32_t value)
  *
  * @param[in] value       64-bit counter value
  * @date  18.02.2022
+ * @date  24.02.2022  Changed naming convention
  ******************************************************************************/
-RV_STATIC_FORCE_INLINE void STK_SetValue(uint64_t value)
+RV_STATIC_FORCE_INLINE void SysTick_SetValue(uint64_t value)
 {
-  STK_SetValueHigh((uint32_t)(value >> 32));
-  STK_SetValueLow((uint32_t)value);
+  SysTick_SetValueHigh((uint32_t)(value >> 32));
+  SysTick_SetValueLow((uint32_t)value);
 }
 
 /*!****************************************************************************
@@ -417,10 +411,23 @@ RV_STATIC_FORCE_INLINE void STK_SetValue(uint64_t value)
  *
  * @return  (uint32_t)  Counter value, low word
  * @date  18.02.2022
+ * @date  24.02.2022  Changed naming convention
  ******************************************************************************/
-RV_STATIC_FORCE_INLINE uint32_t STK_GetValueLow(void)
+RV_STATIC_FORCE_INLINE uint32_t SysTick_GetValueLow(void)
 {
-  return STK->CNTL;
+  return SysTick->CNTL;
+}
+
+/*!****************************************************************************
+ * @brief
+ * Get SysTick counter value, high word
+ *
+ * @return  (uint32_t)  Counter value, low word
+ * @date  24.02.2022
+ ******************************************************************************/
+RV_STATIC_FORCE_INLINE uint32_t SysTick_GetValueHigh(void)
+{
+  return SysTick->CNTH;
 }
 
 /*!****************************************************************************
@@ -432,9 +439,9 @@ RV_STATIC_FORCE_INLINE uint32_t STK_GetValueLow(void)
  * @return  (uint64_t)  Counter value
  * @date  18.02.2022
  ******************************************************************************/
-RV_STATIC_FORCE_INLINE uint64_t STK_GetValue(void)
+RV_STATIC_FORCE_INLINE uint64_t SysTick_GetValue64(void)
 {
-  return ((uint64_t)STK->CNTH << 32) | (uint64_t)STK->CNTL;
+  return ((uint64_t)SysTick->CNTH << 32) | (uint64_t)SysTick->CNTL;
 }
 
 /*!****************************************************************************
@@ -443,10 +450,11 @@ RV_STATIC_FORCE_INLINE uint64_t STK_GetValue(void)
  *
  * @param[in] value       Compare value, low word
  * @date  18.02.2022
+ * @date  24.02.2022  Changed naming convention
  ******************************************************************************/
-RV_STATIC_FORCE_INLINE void STK_SetCompareLow(uint32_t value)
+RV_STATIC_FORCE_INLINE void SysTick_SetCompareLow(uint32_t value)
 {
-  STK_REG_WRITE8(CMPLR, value);
+  SYSTICK_REG_WRITE8(CMPLR, value);
 }
 
 /*!****************************************************************************
@@ -455,10 +463,11 @@ RV_STATIC_FORCE_INLINE void STK_SetCompareLow(uint32_t value)
  *
  * @param[in] value       Compare value, high word
  * @date  18.02.2022
+ * @date  24.02.2022  Changed naming convention
  ******************************************************************************/
-RV_STATIC_FORCE_INLINE void STK_SetCompareHigh(uint32_t value)
+RV_STATIC_FORCE_INLINE void SysTick_SetCompareHigh(uint32_t value)
 {
-  STK_REG_WRITE8(CMPHR, value);
+  SYSTICK_REG_WRITE8(CMPHR, value);
 }
 
 /*!****************************************************************************
@@ -467,361 +476,577 @@ RV_STATIC_FORCE_INLINE void STK_SetCompareHigh(uint32_t value)
  *
  * @param[in] value       64-bit compare value
  * @date  18.02.2022
+ * @date  24.02.2022  Changed naming convention
  ******************************************************************************/
-RV_STATIC_FORCE_INLINE void STK_SetCompare(uint64_t value)
+RV_STATIC_FORCE_INLINE void SysTick_SetCompare(uint64_t value)
 {
-  STK_SetCompareHigh((uint32_t)(value >> 32));
-  STK_SetCompareLow((uint32_t)value);
+  SysTick_SetCompareHigh((uint32_t)(value >> 32));
+  SysTick_SetCompareLow((uint32_t)value);
+}
+
+/* ########################## Core functions ################################ */
+/*********************************************************************
+ * @fn      __NOP
+ *
+ * @brief   nop
+ *
+ * @return  none
+ */
+RV_STATIC_INLINE void __NOP()
+{
+  __asm volatile ("nop");
+}
+
+/*********************************************************************
+ * @fn      __WFI
+ *
+ * @brief   Wait for Interrupt
+ *
+ * @return  None
+ */
+RV_STATIC_FORCE_INLINE void __WFI(void)
+{
+  PFIC->SCTLR &= ~(1<<3); // wfi
+  asm volatile ("wfi");
+}
+
+/*********************************************************************
+ * @fn      __WFE
+ *
+ * @brief   Wait for Events
+ *
+ * @return  None
+ */
+RV_STATIC_FORCE_INLINE void __WFE(void)
+{
+  PFIC->SCTLR |= (1<<3)|(1<<5);   // (wfi->wfe)+(__sev)
+  asm volatile ("wfi");
+  PFIC->SCTLR |= (1<<3);
+  asm volatile ("wfi");
 }
 
 /* ###################### Machine Register Access ########################### */
-/**
- * @brief  Return the Floating-Point Accrued Exceptions
+/*********************************************************************
+ * @fn      __get_FFLAGS
+ *
+ * @brief   Return the Floating-Point Accrued Exceptions
+ *
+ * @return  fflags value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_FFLAGS(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "fflags" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0, ""fflags": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set the Floating-Point Accrued Exceptions
+/*********************************************************************
+ * @fn      __set_FFLAGS
+ *
+ * @brief   Set the Floating-Point Accrued Exceptions
+ *
+ * @param   value  - set FFLAGS value
+ *
+ * @return  none
  */
 RV_STATIC_FORCE_INLINE void __set_FFLAGS(uint32_t value)
 {
-  __ASM volatile ("csrw fflags, %0" : : "r" (value) );
+    __asm volatile("csrw fflags, %0":: "r"(value));
 }
 
-/**
- * @brief  Return the Floating-Point Dynamic Rounding Mode
+/*********************************************************************
+ * @fn      __get_FRM
+ *
+ * @brief   Return the Floating-Point Dynamic Rounding Mode
+ *
+ * @return  frm value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_FRM(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "frm" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0,""frm": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set the Floating-Point Dynamic Rounding Mode
+/*********************************************************************
+ * @fn      __set_FRM
+ *
+ * @brief   Set the Floating-Point Dynamic Rounding Mode
+ *
+ * @param   value  - set frm value
+ *
+ * @return  none
  */
 RV_STATIC_FORCE_INLINE void __set_FRM(uint32_t value)
 {
-  __ASM volatile ("csrw frm, %0" : : "r" (value) );
+    __asm volatile("csrw frm, %0" :: "r"(value));
 }
 
-/**
- * @brief  Return the Floating-Point Control and Status Register
+/*********************************************************************
+ * @fn      __get_FCSR
+ *
+ * @brief   Return the Floating-Point Control and Status Register
+ *
+ * @return  fcsr value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_FCSR(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "fcsr" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0," "fcsr" : "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set the Floating-Point Control and Status Register
+/*********************************************************************
+ * @fn      __set_FCSR
+ *
+ * @brief   Set the Floating-Point Dynamic Rounding Mode
+ *
+ * @param   value  - set fcsr value
+ *
+ * @return  none
  */
 RV_STATIC_FORCE_INLINE void __set_FCSR(uint32_t value)
 {
-  __ASM volatile ("csrw fcsr, %0" : : "r" (value) );
+    __asm volatile("csrw fcsr, %0" : : "r"(value));
 }
 
-/**
- * @brief  Return the Machine Status Register
+/*********************************************************************
+ * @fn      __get_MSTATUS
+ *
+ * @brief   Return the Machine Status Register
+ *
+ * @return  mstatus value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MSTATUS(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mstatus" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0," "mstatus": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set the Machine Status Register
+/*********************************************************************
+ * @fn      __set_MSTATUS
+ *
+ * @brief   Set the Machine Status Register
+ *
+ * @param   value  - set mstatus value
+ *
+ * @return  none
  */
 RV_STATIC_FORCE_INLINE void __set_MSTATUS(uint32_t value)
 {
-  __ASM volatile ("csrw mstatus, %0" : : "r" (value) );
+    __asm volatile("csrw mstatus, %0" : : "r"(value));
 }
 
-/**
- * @brief  Return the Machine ISA Register
+/*********************************************************************
+ * @fn      __get_MISA
+ *
+ * @brief   Return the Machine ISA Register
+ *
+ * @return  misa value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MISA(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "misa" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0,""misa" : "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set the Machine ISA Register
+/*********************************************************************
+ * @fn      __set_MISA
+ *
+ * @brief   Set the Machine ISA Register
+ *
+ * @param   value  - set misa value
+ *
+ * @return  none
  */
 RV_STATIC_FORCE_INLINE void __set_MISA(uint32_t value)
 {
-  __ASM volatile ("csrw misa, %0" : : "r" (value) );
+    __asm volatile("csrw misa, %0" : : "r"(value));
 }
 
-/**
- * @brief  Return the Machine Interrupt Enable Register
+/*********************************************************************
+ * @fn      __get_MIE
+ *
+ * @brief   Return the Machine Interrupt Enable Register
+ *
+ * @return  mie value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MIE(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mie" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0," "mie": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set the Machine ISA Register
+/*********************************************************************
+ * @fn      __set_MISA
+ *
+ * @brief   Set the Machine ISA Register
+ *
+ * @param   value  - set mie value
+ *
+ * @return  none
  */
 RV_STATIC_FORCE_INLINE void __set_MIE(uint32_t value)
 {
-  __ASM volatile ("csrw mie, %0" : : "r" (value) );
+    __asm volatile("csrw mie, %0": : "r"(value));
 }
 
-
-/**
- * @brief  Return the Machine Trap-Vector Base-Address Register
+/*********************************************************************
+ * @fn      __get_MTVEC
+ *
+ * @brief   Return the Machine Trap-Vector Base-Address Register
+ *
+ * @return  mtvec value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MTVEC(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mtvec" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0," "mtvec": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set the Machine Trap-Vector Base-Address Register
+/*********************************************************************
+ * @fn      __set_MTVEC
+ *
+ * @brief   Set the Machine Trap-Vector Base-Address Register
+ *
+ * @param   value  - set mtvec value
+ *
+ * @return  none
  */
 RV_STATIC_FORCE_INLINE void __set_MTVEC(uint32_t value)
 {
-  __ASM volatile ("csrw mtvec, %0" : : "r" (value) );
+    __asm volatile("csrw mtvec, %0":: "r"(value));
 }
 
-/**
- * @brief  Return the Machine Seratch Register
+/*********************************************************************
+ * @fn      __get_MTVEC
+ *
+ * @brief   Return the Machine Seratch Register
+ *
+ * @return  mscratch value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MSCRATCH(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mscratch" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0," "mscratch" : "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set the Machine Seratch Register
+/*********************************************************************
+ * @fn      __set_MTVEC
+ *
+ * @brief   Set the Machine Seratch Register
+ *
+ * @param   value  - set mscratch value
+ *
+ * @return  none
  */
 RV_STATIC_FORCE_INLINE void __set_MSCRATCH(uint32_t value)
 {
-  __ASM volatile ("csrw mscratch, %0" : : "r" (value) );
+    __asm volatile("csrw mscratch, %0" : : "r"(value));
 }
 
-/**
- * @brief  Return the Machine Exception Program Register
+/*********************************************************************
+ * @fn      __get_MEPC
+ *
+ * @brief   Return the Machine Exception Program Register
+ *
+ * @return  mepc value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MEPC(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mepc" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0," "mepc" : "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set the Machine Exception Program Register
+/*********************************************************************
+ * @fn      __set_MEPC
+ *
+ * @brief   Set the Machine Exception Program Register
+ *
+ * @return  mepc value
  */
 RV_STATIC_FORCE_INLINE void __set_MEPC(uint32_t value)
 {
-  __ASM volatile ("csrw mepc, %0" : : "r" (value) );
+    __asm volatile("csrw mepc, %0" : : "r"(value));
 }
 
-/**
- * @brief  Return the Machine Cause Register
+/*********************************************************************
+ * @fn      __get_MCAUSE
+ *
+ * @brief   Return the Machine Cause Register
+ *
+ * @return  mcause value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MCAUSE(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mcause" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0," "mcause": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set the Machine Cause Register
+/*********************************************************************
+ * @fn      __set_MEPC
+ *
+ * @brief   Set the Machine Cause Register
+ *
+ * @return  mcause value
  */
 RV_STATIC_FORCE_INLINE void __set_MCAUSE(uint32_t value)
 {
-  __ASM volatile ("csrw mcause, %0" : : "r" (value) );
+    __asm volatile("csrw mcause, %0":: "r"(value));
 }
 
-/**
- * @brief  Return the Machine Trap Value Register
+/*********************************************************************
+ * @fn      __get_MTVAL
+ *
+ * @brief   Return the Machine Trap Value Register
+ *
+ * @return  mtval value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MTVAL(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mtval" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0," "mtval" : "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set the Machine Trap Value Register
+/*********************************************************************
+ * @fn      __set_MTVAL
+ *
+ * @brief   Set the Machine Trap Value Register
+ *
+ * @return  mtval value
  */
 RV_STATIC_FORCE_INLINE void __set_MTVAL(uint32_t value)
 {
-  __ASM volatile ("csrw mtval, %0" : : "r" (value) );
+    __asm volatile("csrw mtval, %0":: "r"(value));
 }
 
-/**
- * @brief  Return the Machine Interrupt Pending Register
+/*********************************************************************
+ * @fn      __get_MIP
+ *
+ * @brief   Return the Machine Interrupt Pending Register
+ *
+ * @return  mip value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MIP(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mip" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0," "mip": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set the Machine Interrupt Pending Register
+/*********************************************************************
+ * @fn      __set_MIP
+ *
+ * @brief   Set the Machine Interrupt Pending Register
+ *
+ * @return  mip value
  */
 RV_STATIC_FORCE_INLINE void __set_MIP(uint32_t value)
 {
-  __ASM volatile ("csrw mip, %0" : : "r" (value) );
+    __asm volatile("csrw mip, %0":: "r"(value));
 }
 
-/**
- * @brief  Return Lower 32 bits of Cycle counter
+/*********************************************************************
+ * @fn      __get_MCYCLE
+ *
+ * @brief   Return Lower 32 bits of Cycle counter
+ *
+ * @return  mcycle value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MCYCLE(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mcycle" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0," "mcycle": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set Lower 32 bits of Cycle counter
+/*********************************************************************
+ * @fn      __set_MCYCLE
+ *
+ * @brief   Set Lower 32 bits of Cycle counter
+ *
+ * @return  mcycle value
  */
 RV_STATIC_FORCE_INLINE void __set_MCYCLE(uint32_t value)
 {
-  __ASM volatile ("csrw mcycle, %0" : : "r" (value) );
+    __asm volatile("csrw mcycle, %0" : : "r"(value));
 }
 
-/**
- * @brief  Return Upper 32 bits of Cycle counter
+/*********************************************************************
+ * @fn      __get_MCYCLEH
+ *
+ * @brief   Return Upper 32 bits of Cycle counter
+ *
+ * @return  mcycleh value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MCYCLEH(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mcycleh" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0,""mcycleh" : "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set Upper 32 bits of Cycle counter
+/*********************************************************************
+ * @fn      __set_MCYCLEH
+ *
+ * @brief   Set Upper 32 bits of Cycle counter
+ *
+ * @return  mcycleh value
  */
 RV_STATIC_FORCE_INLINE void __set_MCYCLEH(uint32_t value)
 {
-  __ASM volatile ("csrw mcycleh, %0" : : "r" (value) );
+    __asm volatile("csrw mcycleh, %0":: "r"(value));
 }
 
-/**
- * @brief  Return Lower 32 bits of Instructions-retired counter
+/*********************************************************************
+ * @fn      __get_MINSTRET
+ *
+ * @brief   Return Lower 32 bits of Instructions-retired counter
+ *
+ * @return  mcause value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MINSTRET(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "minstret" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0,""minstret": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set Lower 32 bits of Instructions-retired counter
+/*********************************************************************
+ * @fn      __set_MINSTRET
+ *
+ * @brief   Set Lower 32 bits of Instructions-retired counter
+ *
+ * @return  minstret value
  */
 RV_STATIC_FORCE_INLINE void __set_MINSTRET(uint32_t value)
 {
-  __ASM volatile ("csrw minstret, %0" : : "r" (value) );
+    __asm volatile("csrw minstret, %0":: "r"(value));
 }
 
-/**
- * @brief  Return Upper 32 bits of Instructions-retired counter
+/*********************************************************************
+ * @fn      __get_MINSTRETH
+ *
+ * @brief   Return Upper 32 bits of Instructions-retired counter
+ *
+ * @return  minstreth value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MINSTRETH(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "minstreth" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0,""minstreth": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Set Upper 32 bits of Instructions-retired counter
+/*********************************************************************
+ * @fn      __set_MINSTRETH
+ *
+ * @brief   Set Upper 32 bits of Instructions-retired counter
+ *
+ * @return  minstreth value
  */
 RV_STATIC_FORCE_INLINE void __set_MINSTRETH(uint32_t value)
 {
-  __ASM volatile ("csrw minstreth, %0" : : "r" (value) );
+    __asm volatile("csrw minstreth, %0":: "r"(value));
 }
 
-/**
- * @brief  Return Vendor ID Register
+/*********************************************************************
+ * @fn      __get_MVENDORID
+ *
+ * @brief   Return Vendor ID Register
+ *
+ * @return  mvendorid value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MVENDORID(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mvendorid" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0,""mvendorid": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Return Machine Architecture ID Register
+/*********************************************************************
+ * @fn      __get_MARCHID
+ *
+ * @brief   Return Machine Architecture ID Register
+ *
+ * @return  marchid value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MARCHID(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "marchid" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0,""marchid": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Return Machine Implementation ID Register
+/*********************************************************************
+ * @fn      __get_MIMPID
+ *
+ * @brief   Return Machine Implementation ID Register
+ *
+ * @return  mimpid value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MIMPID(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mimpid" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0,""mimpid": "=r"(result));
+    return (result);
 }
 
-/**
- * @brief  Return Hart ID Register
+/*********************************************************************
+ * @fn      __get_MHARTID
+ *
+ * @brief   Return Hart ID Register
+ *
+ * @return  mhartid value
  */
 RV_STATIC_FORCE_INLINE uint32_t __get_MHARTID(void)
 {
-  uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ( "csrr %0," "mhartid" : "=r" (result) );
-  return (result);
+    __asm volatile("csrr %0,""mhartid": "=r"(result));
+    return (result);
+}
+
+/*********************************************************************
+ * @fn      __get_SP
+ *
+ * @brief   Return SP Register
+ *
+ * @return  SP value
+ */
+RV_STATIC_FORCE_INLINE uint32_t __get_SP(void)
+{
+    uint32_t result;
+
+    asm volatile("mv %0,""sp": "=r"(result):);
+    return (result);
 }
 
 #endif/* __CORE_RISCV_H__ */

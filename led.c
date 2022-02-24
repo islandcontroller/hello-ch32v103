@@ -36,12 +36,13 @@ static uint32_t ulLastChange;
  * Initialise LED animation module
  *
  * @date  17.02.2022
+ * @date  24.02.2022  Changed SysTick naming convention
  ******************************************************************************/
 void vInitLed(void)
 {
   bCountDirUp = true;
   uiBrightness = 0;
-  ulLastChange = STK_GetValueLow();
+  ulLastChange = SysTick_GetValueLow();
 }
 
 /*!****************************************************************************
@@ -49,11 +50,12 @@ void vInitLed(void)
  * Handle animation in main() polling
  *
  * @date  17.02.2022
+ * @date  24.02.2022  Changed SysTick naming convention
  ******************************************************************************/
 void vPollLed(void)
 {
   /* Early exit until minimum interval is reached         */
-  uint32_t ulNow = STK_GetValueLow();
+  uint32_t ulNow = SysTick_GetValueLow();
   if (ulNow - ulLastChange < LED_TIME_INTER)
   {
     return;

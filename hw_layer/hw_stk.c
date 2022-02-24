@@ -19,8 +19,9 @@
  *
  * @date  17.02.2022
  * @date  18.02.2022  Modified access functions
+ * @date  24.02.2022  Changed SysTick naming convention
  ******************************************************************************/
 void vInitHW_STK(void)
 {
-  STK_Cmd(ENABLE);
+  SysTick_Cmd(ENABLE);
 }
