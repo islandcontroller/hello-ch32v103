@@ -5,7 +5,7 @@ A simple "Hello World"-like project for the WCH CH32V103 RISC-V MCU.
 <p align="center"><img src="scr.png" /></p>
 
 This project contains a simple set of modules to get the MCU running in a minimal configuration:
-  - Serial output on USART1 (connected to WCH-Link VCP)
+  - Serial I/O on USART1 (connected to WCH-Link VCP)
   - SysTick enabled and using empty dummy interrupt handler
   - TIM3 Channel 1 configured for PWM output to LED
 
@@ -18,7 +18,7 @@ This project contains a simple set of modules to get the MCU running in a minima
 ## Usage
 
 * Load this project in **MounRiver Studio** and run the provided `.launch` file from Debug Configurations.
-* Open a serial terminal on the WCH-Link programmer's VCP (**9600 Baud, 8N1**)
+* Open a serial terminal on the WCH-Link programmer's VCP (**115200 Baud, 8N1**)
 * Flash the firmware to the MCU and resume program execution
 
 ## Licensing

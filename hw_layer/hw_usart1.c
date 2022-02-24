@@ -15,10 +15,10 @@
 
 /*!****************************************************************************
  * @brief
- * Activate clock supply and initialise USART1 for transmit-only output at
- * 115200 Baud, 8n1.
+ * Activate clock supply and initialise USART1 for 115200 Baud, 8n1.
  *
  * @date  11.02.2022
+ * @date  23.02.2022  Modified to activate RX mode
  ******************************************************************************/
 void vInitHW_USART1(void)
 {
@@ -31,7 +31,7 @@ void vInitHW_USART1(void)
     .USART_WordLength = USART_WordLength_8b,
     .USART_Parity = USART_Parity_No,
     .USART_StopBits = USART_StopBits_1,
-    .USART_Mode = USART_Mode_Tx /* Transmit only          */
+    .USART_Mode = USART_Mode_Tx | USART_Mode_Rx
   };
   USART_Init(USART1, &sInit);
 

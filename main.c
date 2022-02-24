@@ -7,7 +7,7 @@
  *
  * This project contains a simple set of modules to get the MCU running in a
  * minimal configuration:
- *  - Serial output on USART1 (connected to WCH-Link VCP)
+ *  - Polling-mode serial I/O on USART1 (connected to WCH-Link VCP)
  *  - SysTick enabled and using empty dummy interrupt handler
  *  - TIM3 PWM output to LED
  * All project files are also available online at:
@@ -17,8 +17,8 @@
  * @date  14.02.2022  Added core information printout
  * @date  17.02.2022  Added clocks, ESig information printout
  * @date  17.02.2022  Added LED animation
+ * @date  23.02.2022  Added remote echo and serial input commands processing
  ******************************************************************************/
-
 
 /*- Header files -------------------------------------------------------------*/
 #include <stdio.h>
@@ -152,8 +152,6 @@ static void vPrintSysCoreClk(void)
  * @brief
  * Print flash size and device ID information
  *
- * @param[in] uiFlSize    Flash memory size from ESIG
- * @param[in] aulUID      Unique device ID from ESIG
  * @date  17.02.2022
  ******************************************************************************/
 static void vPrintEsigInfo(void)
@@ -173,6 +171,43 @@ static void vPrintEsigInfo(void)
   vPrintDbgSer(acLine);
 }
 
+/*!****************************************************************************
+ * @brief
+ * Serial input processing
+ *
+ * @date  23.02.2022
+ ******************************************************************************/
+void vPollSerial(void)
+{
+  /* Early exit, if no data is available                  */
+  if (!bIsDbgSerAvailable()) return;
+
+  /* Fetch character and print remote echo                */
+  char c = cGetCharDbgSer();
+  vPutCharDbgSer(c);
+
+  /* Process command                                      */
+  switch (c)
+  {
+    case '?':
+      /* Show available commands                          */
+      vPrintDbgSer(
+        "\r\nAvailable Commands:\r\n"
+        "  ?    Show help\r\n"
+        "  r    Reboot system\r\n"
+      );
+      break;
+
+    case 'r':
+      /* Reboot command                                   */
+      NVIC_SystemReset();
+      break;
+
+    default:
+      ;
+  }
+}
+
 
 /*!****************************************************************************
  * @brief
@@ -182,12 +217,14 @@ static void vPrintEsigInfo(void)
  * @date  14.02.2022  Added core information printout
  * @date  17.02.2022  Added clocks, ESig information printout
  * @date  17.02.2022  Added LED animation
+ * @date  23.02.2022  Added serial input processing
  ******************************************************************************/
 int main(void)
 {
   vInitHW();
   vInitLed();
 
+  /* Print system info                                    */
   vPrintDbgSer(
     "\x1b[2J"
     "--------------------------------------------------\r\n"
@@ -209,8 +246,10 @@ int main(void)
   vPrintDbgSer("\r\n");
   vPrintEsigInfo();
 
+  /* Main program loop                                    */
   while (1)
   {
     vPollLed();
+    vPollSerial();
   }
 }

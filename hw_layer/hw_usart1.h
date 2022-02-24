@@ -13,7 +13,7 @@
 
 /*- Macros -------------------------------------------------------------------*/
 /*! @brief Serial Baudrate                                                    */
-#define USART1_BAUD_RATE              9600
+#define USART1_BAUD_RATE              115200
 
 
 /*- Exported functions -------------------------------------------------------*/
