@@ -18,6 +18,10 @@ This project contains a simple set of modules to get the MCU running in a minima
 
 ## Usage
 
+* Clone this repository using the following command. Note the use of the `--recursive` tag.
+  ```
+  git clone --recursive https://github.com/islandcontroller/hello-ch32v103
+  ```
 * Load this project in **MounRiver Studio** and build the executable
 * Open a serial terminal on the WCH-Link programmer's VCP (**115200 Baud, 8N1**)
 * Flash the firmware to the MCU using the provided `.launch` script
