@@ -141,6 +141,7 @@ int _read(int fd, void* buffer, unsigned buffer_size)
  * @param[in] count         Number of bytes
  * @return  (int)         Number of bytes written
  * @date  03.03.2022
+ * @date  03.03.2022  Added red text coloring for stderr output
  ******************************************************************************/
 int _write(int fd, const char* buffer, unsigned count)
 {
@@ -151,7 +152,9 @@ int _write(int fd, const char* buffer, unsigned count)
   }
   else if (fd == STDOUT_FILENO || fd == STDERR_FILENO)
   {
+    if (fd == STDERR_FILENO) vPrintDbgSer(VT100_COLOR_FGRED);
     vWriteDbgSer((const unsigned char*)buffer, count);
+    if (fd == STDERR_FILENO) vPrintDbgSer(VT100_COLOR_RESET);
     return (int)count;
   }
   else
