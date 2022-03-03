@@ -16,6 +16,10 @@ This project contains a simple set of modules to get the MCU running in a minima
 - [MounRiver Studio IDE](http://www.mounriver.com/)
 - Serial terminal program, e.g. [PuTTy](https://www.putty.org/) or minicom
 
+## Hardware Setup
+
+* Connect the `LED1` and `PA6` pins on header `J3` using a female-female jumper wire
+
 ## Usage
 
 * Clone this repository using the following command. Note the use of the `--recursive` tag.
