@@ -27,7 +27,7 @@
 #include "ch32v10x_wwdg.h"
 #include "ch32v10x_usb.h"
 #include "ch32v10x_usb_host.h"
-#include "ch32v10x_misc.h"
+#include "ch32v10x_pfic.h"
 
 #endif /* __CH32V10x_CONF_H */
 
