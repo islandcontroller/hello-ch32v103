@@ -216,7 +216,7 @@ static void vPollSerial(void)
       break;
 
     default:
-      printf("Unknown command. Press \"?\" to show available commands.\r\n");
+      fprintf(stderr, "Unknown command. Press \"?\" to show available commands.\r\n");
   }
 
   /* Input prompt                                         */
@@ -236,6 +236,7 @@ static void vPollSerial(void)
  * @date  23.02.2022  Added serial input processing
  * @date  24.02.2022  Added help prompt
  * @date  03.03.2022  Modified to use printf()
+ * @date  03.03.2022  Moved escape sequence into dbgser macro
  ******************************************************************************/
 int main(void)
 {
@@ -247,7 +248,7 @@ int main(void)
 
   /* Print system info                                    */
   printf(
-    "\x1b[2J"
+    VT100_CLEAR_TERM
     "--------------------------------------------------\r\n"
     "        ##                                        \r\n"
     "\r\n"
