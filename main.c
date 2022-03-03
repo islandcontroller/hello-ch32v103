@@ -20,6 +20,7 @@
  * @date  17.02.2022  Added LED animation
  * @date  23.02.2022  Added remote echo and serial input commands processing
  * @date  24.02.2022  Added temperature sensor and Vrefint info printout
+ * @date  03.03.2022  Modified to used printf(), putchar() and getchar()
  ******************************************************************************/
 
 /*- Header files -------------------------------------------------------------*/
@@ -28,13 +29,9 @@
 #include "ch32v10x.h"
 #include "hw_init.h"
 #include "hw_adc.h"
+#include "syscalls.h"
 #include "dbgser.h"
 #include "led.h"
-
-
-/*- Macros -------------------------------------------------------------------*/
-/*! @brief Output line buffer size in bytes (incl. trailing zero)             */
-#define LINE_BUF_LEN                  53
 
 
 /*- Private variables --------------------------------------------------------*/
@@ -83,46 +80,34 @@ const char* const apszMisaExt[26] = {
  * Print plain-text info from MISA
 
  * @date  12.02.2022
+ * @date  03.03.2022  Modified to use printf()
  ******************************************************************************/
 static void vPrintCoreInfo(void)
 {
-  char acLine[LINE_BUF_LEN];
-
   uint32_t ulMArchId = __get_MARCHID();
   uint32_t ulMVendorId = __get_MVENDORID();
   uint32_t ulMImpId = __get_MIMPID();
   uint32_t ulMISA = __get_MISA();
 
-  vPrintDbgSer(
+  printf(
     "-- Core Information ------------------------------\r\n"
   );
 
   /* Print register values                                */
-  sprintf(acLine, "MARCHID:   0x%08lX\r\n", ulMArchId);
-  vPrintDbgSer(acLine);
-  sprintf(acLine, "MIMPID:    0x%08lX\r\n", ulMImpId);
-  vPrintDbgSer(acLine);
-  sprintf(acLine, "MVENDORID: 0x%08lX\r\n", ulMVendorId);
-  vPrintDbgSer(acLine);
-  sprintf(acLine, "MISA:      0x%08lX\r\n", ulMISA);
-  vPrintDbgSer(acLine);
+  printf("MARCHID:   0x%08lX\r\n", ulMArchId);
+  printf("MIMPID:    0x%08lX\r\n", ulMImpId);
+  printf("MVENDORID: 0x%08lX\r\n", ulMVendorId);
+  printf("MISA:      0x%08lX\r\n", ulMISA);
 
   /* Print MXL configuration                              */
   unsigned uMxl = (ulMISA >> 30) & 0x3UL;
-  vPrintDbgSer("  MXL:\r\n    ");
-  vPrintDbgSer(apszMisaMxl[uMxl]);
-  vPrintDbgSer("\r\n");
+  printf("  MXL:\r\n    %s\r\n", apszMisaMxl[uMxl]);
 
   /* Print extensions information                         */
-  vPrintDbgSer("  Extensions:\r\n");
+  printf("  Extensions:\r\n");
   for (unsigned i = 0; i < 26; ++i)
   {
-    if (ulMISA & (1UL << i))
-    {
-      vPrintDbgSer("    ");
-      vPrintDbgSer(apszMisaExt[i]);
-      vPrintDbgSer("\r\n");
-    }
+    if (ulMISA & (1UL << i)) printf("    %s\r\n", apszMisaExt[i]);
   }
 }
 
@@ -135,20 +120,18 @@ static void vPrintCoreInfo(void)
  * ensure HCLK value recalculation.
  *
  * @date  14.02.2022
+ * @date  03.03.2022  Modified to use printf()
  ******************************************************************************/
 static void vPrintSysCoreClk(void)
 {
-  char acLine[LINE_BUF_LEN];
-
-  vPrintDbgSer(
+  printf(
     "-- Clocks ----------------------------------------\r\n"
   );
 
   unsigned uKHz = SystemCoreClock / 1000;
   unsigned uMHz = uKHz / 1000;
   unsigned uKHzRem = uKHz % 1000;
-  sprintf(acLine, "f_HCLK = %d.%03d MHz\r\n", uMHz, uKHzRem);
-  vPrintDbgSer(acLine);
+  printf("f_HCLK = %d.%03d MHz\r\n", uMHz, uKHzRem);
 }
 
 /*!****************************************************************************
@@ -156,22 +139,19 @@ static void vPrintSysCoreClk(void)
  * Print flash size and device ID information
  *
  * @date  17.02.2022
+ * @date  03.03.2022  Modified to use printf()
  ******************************************************************************/
 static void vPrintEsigInfo(void)
 {
   const volatile uint16_t* puiFlSize = (const void*)0x1FFFF7E0UL;
   const volatile uint32_t* pulUID = (const void*)0x1FFFF7E8UL;
 
-  char acLine[LINE_BUF_LEN];
-
-  vPrintDbgSer(
+  printf(
     "-- ESIG ------------------------------------------\r\n"
   );
 
-  sprintf(acLine, "FLASH Size: %d KB\r\n", *puiFlSize);
-  vPrintDbgSer(acLine);
-  sprintf(acLine, "Unique ID: %08lX %08lX %08lX\r\n", pulUID[2], pulUID[1], pulUID[0]);
-  vPrintDbgSer(acLine);
+  printf("FLASH Size: %d KB\r\n", *puiFlSize);
+  printf("Unique ID: %08lX %08lX %08lX\r\n", pulUID[2], pulUID[1], pulUID[0]);
 }
 
 /*!****************************************************************************
@@ -179,22 +159,19 @@ static void vPrintEsigInfo(void)
  * Print analog inputs info
  *
  * @date  24.02.2022
+ * @date  03.03.2022  Modified to use printf()
  ******************************************************************************/
 static void vPrintAnalogInfo(void)
 {
-  char acLine[LINE_BUF_LEN];
-
   /* Temperature sensor values                            */
   int32_t lVoltageTS = uiHW_GetAdcConversionValue_mV(ADC_Channel_TempSensor);
   int32_t lTemperature = TempSensor_Volt_To_Temper(lVoltageTS);
-  sprintf(acLine, "Temp sensor: %ld mV, %ld degC", lVoltageTS, lTemperature);
-  vPrintDbgSer(acLine);
-  if ((lTemperature < 10) || (lTemperature > 50)) vPrintDbgSer(" (invalid?)");
+  printf("Temp sensor: %ld mV, %ld degC", lVoltageTS, lTemperature);
+  if ((lTemperature < 10) || (lTemperature > 50)) printf(" (invalid?)");
 
   /* Internal voltage reference                           */
   int32_t lVoltageVref = uiHW_GetAdcConversionValue_mV(ADC_Channel_Vrefint);
-  sprintf(acLine, "\r\nVrefint: %ld mV\r\n", lVoltageVref);
-  vPrintDbgSer(acLine);
+  printf("\r\nVrefint: %ld mV\r\n", lVoltageVref);
 }
 
 /*!****************************************************************************
@@ -204,6 +181,7 @@ static void vPrintAnalogInfo(void)
  * @date  23.02.2022
  * @date  24.02.2022  Changed NVIC naming convention
  * @date  24.02.2022  Added analog inputs readout command; modified help text
+ * @date  03.03.2022  Modified to use printf(), putchar(), getchar()
  ******************************************************************************/
 static void vPollSerial(void)
 {
@@ -211,16 +189,15 @@ static void vPollSerial(void)
   if (!bIsDbgSerAvailable()) return;
 
   /* Fetch character and print remote echo                */
-  char c = cGetCharDbgSer();
-  vPutCharDbgSer(c);
-  vPrintDbgSer("\r\n");
+  char c = getchar();
+  printf("%c\r\n", c);
 
   /* Process command                                      */
   switch (c)
   {
     case '?':
       /* Show available commands                          */
-      vPrintDbgSer(
+      printf(
         "Available Commands:\r\n"
         "  ?    Show this help\r\n"
         "  a    Print analog inputs info\r\n"
@@ -239,11 +216,12 @@ static void vPollSerial(void)
       break;
 
     default:
-      vPrintDbgSer("Unknown command. Press \"?\" to show available commands.\r\n");
+      printf("Unknown command. Press \"?\" to show available commands.\r\n");
   }
 
   /* Input prompt                                         */
-  vPutCharDbgSer('>');
+  putchar('>');
+  fflush(stdout);
 }
 
 
@@ -257,14 +235,18 @@ static void vPollSerial(void)
  * @date  17.02.2022  Added LED animation
  * @date  23.02.2022  Added serial input processing
  * @date  24.02.2022  Added help prompt
+ * @date  03.03.2022  Modified to use printf()
  ******************************************************************************/
 int main(void)
 {
   vInitHW();
   vInitLed();
 
+  /* Init syscalls retargeting                            */
+  vInitSyscalls();
+
   /* Print system info                                    */
-  vPrintDbgSer(
+  printf(
     "\x1b[2J"
     "--------------------------------------------------\r\n"
     "        ##                                        \r\n"
@@ -280,11 +262,12 @@ int main(void)
     "\r\n"
   );
   vPrintCoreInfo();
-  vPrintDbgSer("\r\n");
+  printf("\r\n");
   vPrintSysCoreClk();
-  vPrintDbgSer("\r\n");
+  printf("\r\n");
   vPrintEsigInfo();
-  vPrintDbgSer("\r\nPress \"?\" to show available commands.\r\n>");
+  printf("\r\nPress \"?\" to show available commands.\r\n>");
+  fflush(stdout);
 
   /* Main program loop                                    */
   while (1)
