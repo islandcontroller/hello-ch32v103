@@ -32,9 +32,9 @@ This project contains a simple set of modules to get the MCU running in a minima
    |  2|           |7       | | | | R1,R2      |
    o---| A1     WP |---+    |_| |_| 10k    +---| GND
    |  3|           |6  |     |   |         |   |
-   o---| A2    SCL |---(-----o---(---------(---| PB11 (I2C2_SCL)
+   o---| A2    SCL |---(-----o---(---------(---| PB10 (I2C2_SCL)
    |  4|           |5  |         |         |   |
-   o---| GND   SDA |---(---------o---------(---| PB10 (I2C2_SDA)
+   o---| GND   SDA |---(---------o---------(---| PB11 (I2C2_SDA)
    |   |___________|   |                   |   |________________
   GND  U2             GND                 GND  U1
        AT24C64 (DIP8)                          CH32V103R8T6
