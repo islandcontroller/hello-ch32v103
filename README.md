@@ -26,18 +26,18 @@ This project contains a simple set of modules to get the MCU running in a minima
 * Connect the `LED1` and `PA6` pins on header `J3` using a female-female jumper wire
 * Connect the 24C64 EEPROM to `PB10` and `PB11` and add 10k pull-up resistors to SDA and SCL:
   ```
-       .___________.  VCC   VCC VCC       VCC  .________________
-      1|    |_|    |8  |     |   |         |   |
-   +---| A0    VCC |---+    .|. .|.        +---| VCC (3V3)
-   |  2|           |7       | | | | R1,R2      |
-   o---| A1     WP |---+    |_| |_| 10k    +---| GND
-   |  3|           |6  |     |   |         |   |
-   o---| A2    SCL |---(-----o---(---------(---| PB10 (I2C2_SCL)
-   |  4|           |5  |         |         |   |
-   o---| GND   SDA |---(---------o---------(---| PB11 (I2C2_SDA)
-   |   |___________|   |                   |   |________________
-  GND  U2             GND                 GND  U1
-       AT24C64 (DIP8)                          CH32V103R8T6
+                        VCC   VCC VCC       VCC
+      1┏━━━━━┯━┯━━━━━┓8  │     │   │         │   ┏━━━━━━━━━━━━━━━━
+   ┌───┨ A0  ╰─╯ VCC ┠───┘    ┏┷┓ ┏┷┓ R1,R2  └───┨ VCC (3V3)
+   │  2┃             ┃7       ┃ ┃ ┃ ┃ 10k        ┃
+   ├───┨ A1       WP ┠───┐    ┗┯┛ ┗┯┛        ┌───┨ GND
+   │  3┃             ┃6  │     │   │         │   ┃
+   ├───┨ A2      SCL ┠───┼─────┴───┼─────────┼───┨ PB10 (I2C2_SCL)
+   │  4┃             ┃5  │         │         │   ┃
+   ├───┨ GND     SDA ┠───┼─────────┴─────────┼───┨ PB11 (I2C2_SDA)
+   │   ┗━━━━━━━━━━━━━┛   │                   │   ┗━━━━━━━━━━━━━━━━
+  GND  U2               GND                 GND  U1
+       AT24C64 (DIP8)                            CH32V103R8T6
   ```
 
 ## Usage
