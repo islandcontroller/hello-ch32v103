@@ -11,6 +11,7 @@
  *  - SysTick enabled and using empty dummy interrupt handler
  *  - TIM3 PWM output to LED
  *  - ADC1 internal temperature sensor and Vrefint readout
+ *  - I2C2 for 24C64 EEPROM read/write
  * All project files are also available online at:
  *  https://github.com/islandcontroller/hello-ch32v103
  *
@@ -21,17 +22,31 @@
  * @date  23.02.2022  Added remote echo and serial input commands processing
  * @date  24.02.2022  Added temperature sensor and Vrefint info printout
  * @date  03.03.2022  Modified to used printf(), putchar() and getchar()
+ * @date  04.03.2022  Added EEPROM demo
  ******************************************************************************/
 
 /*- Header files -------------------------------------------------------------*/
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "ch32v10x.h"
 #include "hw_init.h"
 #include "hw_adc.h"
 #include "syscalls.h"
 #include "dbgser.h"
 #include "led.h"
+#include "eeprom.h"
+
+
+/*- Macros -------------------------------------------------------------------*/
+/*! @brief Enable 24C64 EEPROM demo                                           */
+#define USE_EEPROM_DEMO
+
+/*! @brief Number of bytes to be read for EEPROM hexdump                      */
+#define HEXDUMP_NUM_BYTES             256
+
+/*! @brief EEPROM Hexdump items per row                                       */
+#define HEXDUMP_ROW_ITEMS             16
 
 
 /*- Private variables --------------------------------------------------------*/
@@ -72,6 +87,11 @@ const char* const apszMisaExt[26] = {
   "Y - (reserved)",
   "Z - (reserved)"
 };
+
+#ifdef USE_EEPROM_DEMO
+/*! EEPROM demo data to be programmed                                         */
+const char* const pszEepromData = "CH32V103 I2C Demo";
+#endif /* USE_EEPROM_DEMO */
 
 
 /*- Private functions --------------------------------------------------------*/
@@ -174,6 +194,51 @@ static void vPrintAnalogInfo(void)
   printf("\r\nVrefint: %ld mV\r\n", lVoltageVref);
 }
 
+#ifdef USE_EEPROM_DEMO
+/*!****************************************************************************
+ * @brief
+ * Print EEPROM hexdump
+ *
+ * @date  04.03.2022
+ ******************************************************************************/
+static void vPrintEepromData(void)
+{
+  unsigned char aucBuffer[HEXDUMP_NUM_BYTES];
+
+  /* Time readout into buffer                             */
+  printf("Reading EEPROM... ");
+  unsigned uStart = SysTick_GetValueLow();
+  vReadEeprom(aucBuffer, 0, HEXDUMP_NUM_BYTES);
+  unsigned uDuration = (SysTick_GetValueLow() - uStart) / ((HSI_VALUE / 8) / 1000);
+  printf("done. Read %d bytes in %d ms.\r\n", HEXDUMP_NUM_BYTES, uDuration);
+
+  /* Hexdump printout                                     */
+  for (unsigned uRow = 0; uRow < HEXDUMP_NUM_BYTES / HEXDUMP_ROW_ITEMS; ++uRow)
+  {
+    /* Address                                            */
+    unsigned uRowAddr = uRow * HEXDUMP_ROW_ITEMS;
+    printf("%04x  ", uRowAddr);
+
+    /* Byte columns                                       */
+    for (unsigned uCol = 0; uCol < HEXDUMP_ROW_ITEMS; ++uCol)
+    {
+      unsigned char ucData = aucBuffer[uRowAddr + uCol];
+      printf("%02x ", ucData);
+      if (uCol == (HEXDUMP_ROW_ITEMS / 2 - 1)) putchar(' ');
+    }
+
+    /* ASCII text representation                          */
+    putchar(' ');
+    for (unsigned uCol = 0; uCol < HEXDUMP_ROW_ITEMS; ++uCol)
+    {
+      unsigned char ucData = aucBuffer[uRowAddr + uCol];
+      putchar(isprint(ucData) ? ucData : '.');
+    }
+    printf("\r\n");
+  }
+}
+#endif /* USE_EEPROM_DEMO */
+
 /*!****************************************************************************
  * @brief
  * Serial input processing
@@ -182,6 +247,7 @@ static void vPrintAnalogInfo(void)
  * @date  24.02.2022  Changed NVIC naming convention
  * @date  24.02.2022  Added analog inputs readout command; modified help text
  * @date  03.03.2022  Modified to use printf(), putchar(), getchar()
+ * @date  04.03.2022  Added EEPROM readout demo
  ******************************************************************************/
 static void vPollSerial(void)
 {
@@ -201,6 +267,9 @@ static void vPollSerial(void)
         "Available Commands:\r\n"
         "  ?    Show this help\r\n"
         "  a    Print analog inputs info\r\n"
+#ifdef USE_EEPROM_DEMO
+        "  e    Read EEPROM\r\n"
+#endif /* USE_EEPROM_DEMO */
         "  r    Reboot system\r\n"
       );
       break;
@@ -209,6 +278,13 @@ static void vPollSerial(void)
       /* Print analog inputs info                         */
       vPrintAnalogInfo();
       break;
+
+#ifdef USE_EEPROM_DEMO
+    case 'e':
+      /* Print EEPROM hexdump                             */
+      vPrintEepromData();
+      break;
+#endif /* USE_EEPROM_DEMO */
 
     case 'r':
       /* Reboot command                                   */
@@ -237,6 +313,7 @@ static void vPollSerial(void)
  * @date  24.02.2022  Added help prompt
  * @date  03.03.2022  Modified to use printf()
  * @date  03.03.2022  Moved escape sequence into dbgser macro
+ * @date  04.03.2022  Added EEPROM programming
  ******************************************************************************/
 int main(void)
 {
@@ -267,6 +344,11 @@ int main(void)
   vPrintSysCoreClk();
   printf("\r\n");
   vPrintEsigInfo();
+#ifdef USE_EEPROM_DEMO
+  printf("\r\nWriting EEPROM... ");
+  vWriteEeprom((const unsigned char*)pszEepromData, 0, strlen(pszEepromData));
+  printf("done.");
+#endif /* USE_EEPROM_DEMO */
   printf("\r\nPress \"?\" to show available commands.\r\n>");
   fflush(stdout);
 

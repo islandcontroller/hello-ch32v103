@@ -7,6 +7,7 @@
  *
  * @date  11.02.2022
  * @date  24.02.2022  Added ADC init
+ * @date  03.03.2022  Added I2C2 init
  ******************************************************************************/
 
 /*- Header files -------------------------------------------------------------*/
@@ -17,6 +18,7 @@
 #include "hw_usart1.h"
 #include "hw_tim3.h"
 #include "hw_adc.h"
+#include "hw_i2c2.h"
 
 
 /*!****************************************************************************
@@ -25,6 +27,7 @@
  *
  * @date  11.02.2022
  * @date  24.02.2022  Added ADC init
+ * @date  03.03.2022  Added I2C2 init
  ******************************************************************************/
 void vInitHW(void)
 {
@@ -33,6 +36,7 @@ void vInitHW(void)
   vInitHW_USART1();
   vInitHW_TIM3();
   vInitHW_ADC();
+  vInitHW_I2C2();
 
   SystemCoreClockUpdate();
 }

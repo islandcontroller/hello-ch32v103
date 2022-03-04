@@ -9,16 +9,36 @@ This project contains a simple set of modules to get the MCU running in a minima
   - SysTick enabled and using empty dummy interrupt handler
   - TIM3 Channel 1 configured for PWM output to LED
   - ADC1 internal temperature sensor and Vrefint readout
+  - I2C2 interface with 24C64 EEPROM read and write access
 
 ## Requirements
 
-- WCH CH32V103R8T6-EVT-R1 Evaluation Kit (available from LCSC, [PartNr `C2943982`](https://lcsc.com/product-detail/Development-Boards-Kits_WCH-Jiangsu-Qin-Heng-CH32V103R8T6-EVT-R1_C2943982.html)) + USB-A to USB-C Cable
-- [MounRiver Studio IDE](http://www.mounriver.com/)
-- Serial terminal program, e.g. [PuTTy](https://www.putty.org/) or minicom
+* Hardware
+  * WCH CH32V103R8T6-EVT-R1 Evaluation Kit (available from LCSC, [PartNr `C2943982`](https://lcsc.com/product-detail/Development-Boards-Kits_WCH-Jiangsu-Qin-Heng-CH32V103R8T6-EVT-R1_C2943982.html)) + USB-A to USB-C Cable
+  * (optional) Female-female jumper wires
+  * (optional) AT24C64 EEPROM IC + Solderless breadboard + 2x 10k Resistors
+* Software
+  * [MounRiver Studio IDE](http://www.mounriver.com/)
+  * Serial terminal program, e.g. [PuTTy](https://www.putty.org/) or minicom
 
 ## Hardware Setup
 
 * Connect the `LED1` and `PA6` pins on header `J3` using a female-female jumper wire
+* Connect the 24C64 EEPROM to `PB10` and `PB11` and add 10k pull-up resistors to SDA and SCL:
+  ```
+       .___________.  VCC   VCC VCC       VCC  .________________
+      1|    |_|    |8  |     |   |         |   |
+   +---| A0    VCC |---+    .|. .|.        +---| VCC (3V3)
+   |  2|           |7       | | | | R1,R2      |
+   o---| A1     WP |---+    |_| |_| 10k    +---| GND
+   |  3|           |6  |     |   |         |   |
+   o---| A2    SCL |---(-----o---(---------(---| PB11 (I2C2_SCL)
+   |  4|           |5  |         |         |   |
+   o---| GND   SDA |---(---------o---------(---| PB10 (I2C2_SDA)
+   |   |___________|   |                   |   |________________
+  GND  U2             GND                 GND  U1
+       AT24C64 (DIP8)                          CH32V103R8T6
+  ```
 
 ## Usage
 
@@ -31,6 +51,10 @@ This project contains a simple set of modules to get the MCU running in a minima
 * Flash the firmware to the MCU using the provided `.launch` script
 * Resume execution once breakpoint in `main()` is reached
 * Press `?` in the serial terminal to show available commands
+
+### **Note**
+
+If you choose not to connect the EEPROM IC, be sure to disable the EEPROM demo by commenting out the `#define USE_EEPROM_DEMO` line at the top of `main.c`. Otherwise, the project will hang on boot trying to access the EEPROM.
 
 ## Licensing
 

@@ -22,6 +22,7 @@
  * @date  17.02.2022  Added TIM3CH1 output mapping
  * @date  23.02.2022  Modified USART pin mappings; added RX path
  * @date  03.03.2022  Fixed USART RX pin being configured as AF_PP output
+ * @date  03.03.2022  Added I2C2 SDA/SCL mappings
  ******************************************************************************/
 void vInitHW_GPIO(void)
 {
@@ -48,4 +49,12 @@ void vInitHW_GPIO(void)
     .GPIO_Speed = GPIO_Speed_2MHz
   };
   GPIO_Init(TIM3CH1_GPIO_Port, &sInitTIM3CH1);
+
+  /* I2C2 SCL/SDA                                          */
+  GPIO_InitTypeDef sInitI2C2 = {
+    .GPIO_Pin = I2C2SCL_GPIO_Pin | I2C2SDA_GPIO_Pin,
+    .GPIO_Mode = I2C2_GPIO_Mode,
+    .GPIO_Speed = GPIO_Speed_2MHz
+  };
+  GPIO_Init(I2C2_GPIO_Port, &sInitI2C2);
 }
