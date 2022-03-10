@@ -23,6 +23,8 @@
  * @date  24.02.2022  Added temperature sensor and Vrefint info printout
  * @date  03.03.2022  Modified to used printf(), putchar() and getchar()
  * @date  04.03.2022  Added EEPROM demo
+ * @date  10.03.2022  Added information block readout; Disabled EEPROM demo for
+ *                    default configuration
  ******************************************************************************/
 
 /*- Header files -------------------------------------------------------------*/
@@ -40,10 +42,10 @@
 
 /*- Macros -------------------------------------------------------------------*/
 /*! @brief Enable 24C64 EEPROM demo                                           */
-#define USE_EEPROM_DEMO
+//#define USE_EEPROM_DEMO
 
 /*! @brief Number of bytes to be read for EEPROM hexdump                      */
-#define HEXDUMP_NUM_BYTES             256
+#define EEPROM_NUM_BYTES              256
 
 /*! @brief EEPROM Hexdump items per row                                       */
 #define HEXDUMP_ROW_ITEMS             16
@@ -194,35 +196,27 @@ static void vPrintAnalogInfo(void)
   printf("\r\nVrefint: %ld mV\r\n", lVoltageVref);
 }
 
-#ifdef USE_EEPROM_DEMO
 /*!****************************************************************************
  * @brief
- * Print EEPROM hexdump
+ * Print Hexdump of memory buffer
  *
- * @date  04.03.2022
+ * @param[in] *pBuffer    Data buffer
+ * @param[in] uLen        Number of bytes to display
+ * @param[in] uBaseAdr    Base address for row counters
+ * @date  10.03.2022
  ******************************************************************************/
-static void vPrintEepromData(void)
+static void vPrintHexDump(const uint8_t* pBuffer, unsigned uLen, unsigned uBaseAdr)
 {
-  unsigned char aucBuffer[HEXDUMP_NUM_BYTES];
-
-  /* Time readout into buffer                             */
-  printf("Reading EEPROM... ");
-  unsigned uStart = SysTick_GetValueLow();
-  vReadEeprom(aucBuffer, 0, HEXDUMP_NUM_BYTES);
-  unsigned uDuration = (SysTick_GetValueLow() - uStart) / ((HSI_VALUE / 8) / 1000);
-  printf("done. Read %d bytes in %d ms.\r\n", HEXDUMP_NUM_BYTES, uDuration);
-
-  /* Hexdump printout                                     */
-  for (unsigned uRow = 0; uRow < HEXDUMP_NUM_BYTES / HEXDUMP_ROW_ITEMS; ++uRow)
+  for (unsigned uRow = 0; uRow < uLen / HEXDUMP_ROW_ITEMS; ++uRow)
   {
-    /* Address                                            */
+    /* Address or Offset                                  */
     unsigned uRowAddr = uRow * HEXDUMP_ROW_ITEMS;
-    printf("%04x  ", uRowAddr);
+    printf("%08x  ", uRowAddr + uBaseAdr);
 
     /* Byte columns                                       */
     for (unsigned uCol = 0; uCol < HEXDUMP_ROW_ITEMS; ++uCol)
     {
-      unsigned char ucData = aucBuffer[uRowAddr + uCol];
+      unsigned char ucData = pBuffer[uRowAddr + uCol];
       printf("%02x ", ucData);
       if (uCol == (HEXDUMP_ROW_ITEMS / 2 - 1)) putchar(' ');
     }
@@ -231,13 +225,54 @@ static void vPrintEepromData(void)
     putchar(' ');
     for (unsigned uCol = 0; uCol < HEXDUMP_ROW_ITEMS; ++uCol)
     {
-      unsigned char ucData = aucBuffer[uRowAddr + uCol];
+      unsigned char ucData = pBuffer[uRowAddr + uCol];
       putchar(isprint(ucData) ? ucData : '.');
     }
     printf("\r\n");
   }
 }
+
+#ifdef USE_EEPROM_DEMO
+/*!****************************************************************************
+ * @brief
+ * Print EEPROM hexdump
+ *
+ * @date  04.03.2022
+ * @date  10.03.2022  Moved hexdump printout into separate routine
+ ******************************************************************************/
+static void vPrintEepromData(void)
+{
+  unsigned char aucBuffer[EEPROM_NUM_BYTES];
+
+  /* Time readout into buffer                             */
+  printf("Reading EEPROM... ");
+  unsigned uStart = SysTick_GetValueLow();
+  vReadEeprom(aucBuffer, 0, EEPROM_NUM_BYTES);
+  unsigned uDuration = (SysTick_GetValueLow() - uStart) / ((HSI_VALUE / 8) / 1000);
+  printf("done. Read %d bytes in %d ms.\r\n", EEPROM_NUM_BYTES, uDuration);
+
+  /* Hexdump printout                                     */
+  vPrintHexDump(aucBuffer, EEPROM_NUM_BYTES, 0);
+}
 #endif /* USE_EEPROM_DEMO */
+
+/*!****************************************************************************
+ * @brief
+ * Print User Sel. and Vendor Config. Words
+ *
+ * @date  10.03.2022
+ ******************************************************************************/
+static void vPrintInfoBlockWords(void)
+{
+  const void* pUserSelWord = (const void*)0x1FFFF800UL;
+  const void* pVendConfWord = (const void*)0x1FFFF880UL;
+
+  /* Hexdump printout                                     */
+  printf("User selection word:\r\n");
+  vPrintHexDump(pUserSelWord, 128, (unsigned)pUserSelWord);
+  printf("Vendor configuration word:\r\n");
+  vPrintHexDump(pVendConfWord, 128, (unsigned)pVendConfWord);
+}
 
 /*!****************************************************************************
  * @brief
@@ -248,6 +283,7 @@ static void vPrintEepromData(void)
  * @date  24.02.2022  Added analog inputs readout command; modified help text
  * @date  03.03.2022  Modified to use printf(), putchar(), getchar()
  * @date  04.03.2022  Added EEPROM readout demo
+ * @date  10.03.2022  Added information block readout command
  ******************************************************************************/
 static void vPollSerial(void)
 {
@@ -270,6 +306,7 @@ static void vPollSerial(void)
 #ifdef USE_EEPROM_DEMO
         "  e    Read EEPROM\r\n"
 #endif /* USE_EEPROM_DEMO */
+        "  i    Read information block\r\n"
         "  r    Reboot system\r\n"
       );
       break;
@@ -285,6 +322,11 @@ static void vPollSerial(void)
       vPrintEepromData();
       break;
 #endif /* USE_EEPROM_DEMO */
+
+    case 'i':
+      /* Read information block                           */
+      vPrintInfoBlockWords();
+      break;
 
     case 'r':
       /* Reboot command                                   */
