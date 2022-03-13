@@ -21,7 +21,7 @@ This project contains a simple set of modules to get the MCU running in a minima
   * [MounRiver Studio IDE](http://www.mounriver.com/)
   * Serial terminal program, e.g. [PuTTy](https://www.putty.org/) or minicom
 
-## Hardware Setup
+## Hardware Setup (optional)
 
 * Connect the `LED1` and `PA6` pins on header `J3` using a female-female jumper wire
 * Connect the 24C64 EEPROM to `PB10` and `PB11` and add 10k pull-up resistors to SDA and SCL:
@@ -54,7 +54,7 @@ This project contains a simple set of modules to get the MCU running in a minima
 
 ### **Note**
 
-If you choose not to connect the EEPROM IC, be sure to disable the EEPROM demo by commenting out the `#define USE_EEPROM_DEMO` line at the top of `main.c`. Otherwise, the project will hang on boot trying to access the EEPROM.
+If you want to use the EEPROM demo, remove the comment at the start of the `#define USE_EEPROM_DEMO` line at the top of `main.c`. The demo is disabled by default.
 
 ## Licensing
 
