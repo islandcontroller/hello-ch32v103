@@ -1,4 +1,4 @@
-# hello-ch32v103 [![GitHub license](https://img.shields.io/github/license/islandcontroller/hello-ch32v103?style=flat-square)](LICENSE)
+# hello-ch32v103 [![GitHub license](https://img.shields.io/github/license/islandcontroller/hello-ch32v103?style=flat-square)](LICENSE) [![Discord server link](https://img.shields.io/badge/discord-WCH%20Community-white?style=flat-square&logo=discord)](https://t.co/Qbblvmfbae)
 
 A simple "Hello World"-like project for the WCH CH32V103 RISC-V MCU.
 
@@ -69,4 +69,4 @@ If not stated otherwise in the specific file, the contents of this project are l
 * [WCH-IC: CH32xRM.pdf](http://www.wch-ic.com/downloads/CH32xRM_PDF.html) MCU Reference Manual
 
 If you're looking for further information about WCH products, check out their community Discord server: 
-[![Discord server link](https://img.shields.io/badge/discord-WCH%20Community-white?style=plastic&logo=discord)](https://t.co/Qbblvmfbae)
+[![Discord server link](https://img.shields.io/badge/discord-WCH%20Community-white?style=flat-square&logo=discord)](https://t.co/Qbblvmfbae)
