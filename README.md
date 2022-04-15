@@ -1,4 +1,4 @@
-# hello-ch32v103
+# hello-ch32v103 [![GitHub license](https://img.shields.io/github/license/islandcontroller/hello-ch32v103?style=flat-square)](LICENSE)
 
 A simple "Hello World"-like project for the WCH CH32V103 RISC-V MCU.
 
@@ -62,8 +62,11 @@ If not stated otherwise in the specific file, the contents of this project are l
 
     SPDX-License-Identifier: MIT
 
-## References
+## Help and References
 
 * [openwch/ch32v103](https://github.com/openwch/ch32v103) Manufacturer EVT demos and documentation
-* [CH32V103DS0.pdf](https://github.com/openwch/ch32v103/blob/main/Datasheet/CH32V103DS0.PDF) MCU Datasheet
-* [CH32xRM.pdf](http://www.wch-ic.com/downloads/CH32xRM_PDF.html) MCU Reference Manual
+* [WCH-IC: CH32V103DS0.pdf](http://www.wch-ic.com/downloads/CH32V103DS0_PDF.html) MCU Datasheet
+* [WCH-IC: CH32xRM.pdf](http://www.wch-ic.com/downloads/CH32xRM_PDF.html) MCU Reference Manual
+
+If you're looking for further information about WCH products, check out their community Discord server: 
+[![Discord server link](https://img.shields.io/badge/discord-WCH%20Community-white?style=plastic&logo=discord)](https://t.co/Qbblvmfbae)
