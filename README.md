@@ -18,7 +18,7 @@ This project contains a simple set of modules to get the MCU running in a minima
   * (optional) Female-female jumper wires
   * (optional) AT24C64 EEPROM IC + Solderless breadboard + 2x 10k Resistors
 * Software
-  * [MounRiver Studio IDE](http://www.mounriver.com/)
+  * [MounRiver Studio Community](http://www.mounriver.com/)
   * Serial terminal program, e.g. [PuTTy](https://www.putty.org/) or minicom
 
 ## Hardware Setup (optional)
@@ -46,7 +46,7 @@ This project contains a simple set of modules to get the MCU running in a minima
   ```
   git clone --recursive https://github.com/islandcontroller/hello-ch32v103
   ```
-* Load this project in **MounRiver Studio** and build the executable
+* Load this project in **MounRiver Studio Community** and build the executable
 * Open a serial terminal on the WCH-Link programmer's VCP (**115200 Baud, 8N1**)
 * Flash the firmware to the MCU using the provided `.launch` script
 * Resume execution once breakpoint in `main()` is reached
