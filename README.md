@@ -67,6 +67,7 @@ If not stated otherwise in the specific file, the contents of this project are l
 * [openwch/ch32v103](https://github.com/openwch/ch32v103) Manufacturer EVT demos and documentation
 * [WCH-IC: CH32V103DS0.pdf](http://www.wch-ic.com/downloads/CH32V103DS0_PDF.html) MCU Datasheet
 * [WCH-IC: CH32xRM.pdf](http://www.wch-ic.com/downloads/CH32xRM_PDF.html) MCU Reference Manual
+* [WCH-IC: QingKeV3_Processor_Manual.pdf](http://www.wch-ic.com/downloads/QingKeV3_Processor_Manual_PDF.html) Processor Core Manual
 
 If you're looking for further information about WCH products, check out their community Discord server: 
 [![Discord server link](https://img.shields.io/badge/discord-WCH%20Community-white?style=flat-square&logo=discord)](https://t.co/Qbblvmfbae)
