@@ -11,6 +11,8 @@ This project contains a simple set of modules to get the MCU running in a minima
   - ADC1 internal temperature sensor and Vrefint readout
   - I2C2 interface with 24C64 EEPROM read and write access
 
+**:information_source: See [`README.vscode.md`](README.vscode.md) for VSCode setup information! :information_source:**
+
 ## Requirements
 
 * Hardware
