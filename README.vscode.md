@@ -52,6 +52,9 @@ This project contains a simple set of modules to get the MCU running in a minima
 * Connect WCH-Link debug probe
   * (WSL only) attach to WSL using `usbipd wsl attach --busid <...> -a`.
 * Run the command "**Dev Containers: Reopen in Container**"
+  * On first launch, you may need to copy the udev rules from `/tmp/MRS/beforeinstall` into your **host's** `/etc/udev/rules.d/` directory
+  * Then, reload the rules using `sudo udevadm control --reload-rules` and `sudo udevadm trigger`.
+  * Afterwards, restart the devcontainer.
 * Upon prompt, select the "**GCC x.x riscv-none-embed**" CMake Kit. 
 * Run "**CMake: Configure**"
 * Build using "**CMake: Build [F7]**"
