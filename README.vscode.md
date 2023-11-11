@@ -55,14 +55,10 @@ This project contains a simple set of modules to get the MCU running in a minima
   * On first launch, you may need to copy the udev rules from `/tmp/MRS/beforeinstall` into your **host's** `/etc/udev/rules.d/` directory
   * Then, reload the rules using `sudo udevadm control --reload-rules` and `sudo udevadm trigger`.
   * Afterwards, restart the devcontainer.
-* Upon prompt, select the "**GCC x.x riscv-none-embed**" CMake Kit. 
+* If prompted, select the "**GCC x.x riscv-none-embed**" CMake Kit. 
 * Run "**CMake: Configure**"
 * Build using "**CMake: Build [F7]**"
-* Open a new Terminal tab and start OpenOCD
-
-      openocd -f /opt/openocd/bin/wch-riscv.cfg
-
-* Split the terminal tab using the `[|]`-Button or press `Ctrl + Shift + 5`. Then launch the serial monitor:
+* Open a new terminal and launch the serial monitor:
 
       cu -l /dev/ttyACM0 -s 115200
 
