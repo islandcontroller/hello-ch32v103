@@ -30,7 +30,9 @@
       ],
       "postRemoteConnectCommands": [
         { "text": "monitor reset halt" },
+        { "text": "monitor [target current] configure -event gdb-detach { shutdown }" },
         { "text": "load" },
+        { "text": "monitor reset halt" },
         { "text": "b main" },
         { "text": "b HardFault_Handler" },
       ],
