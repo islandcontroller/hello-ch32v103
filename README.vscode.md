@@ -52,7 +52,7 @@ This project contains a simple set of modules to get the MCU running in a minima
 * Connect WCH-Link debug probe
   * (WSL only) attach to WSL using `usbipd wsl attach --busid <...> -a`.
 * Run the command "**Dev Containers: Reopen in Container**"
-  * On first launch, you may need to copy the udev rules from `/tmp/MRS/beforeinstall` into your **host's** `/etc/udev/rules.d/` directory
+  * On first launch, you may need to copy the udev rules from `/opt/wch/rules/` into your **host's** `/etc/udev/rules.d/` directory
   * Then, reload the rules using `sudo udevadm control --reload-rules` and `sudo udevadm trigger`.
   * Afterwards, restart the devcontainer.
 * If prompted, select the "**GCC x.x riscv-none-embed**" CMake Kit. 
@@ -68,9 +68,11 @@ This project contains a simple set of modules to get the MCU running in a minima
 * Continue execution once the breakpoint in `main()` is reached.
 * Type `?` in the serial monitor Terminal tab to show available commands.
 
-### **Note**
+> **Note**
+> If you want to use the EEPROM demo, remove the comment at the start of the `#define USE_EEPROM_DEMO` line at the top of `main.c`. The demo is disabled by default.
 
-If you want to use the EEPROM demo, remove the comment at the start of the `#define USE_EEPROM_DEMO` line at the top of `main.c`. The demo is disabled by default.
+> **Note**
+> If the debugger fails to program the target device, try updating the firmware of your debugger. The `wchisp` utility is included in the package, and compatible firmware files are provided in the `/opt/wch/firmware` directory inside the container. See the [WCH-Link User Manual](https://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html) for more information.
 
 ## Licensing
 
