@@ -52,10 +52,14 @@ This project contains a simple set of modules to get the MCU running in a minima
 * Connect WCH-Link debug probe
   * (WSL only) attach to WSL using `usbipd wsl attach --busid <...> -a`.
 * Run the command "**Dev Containers: Reopen in Container**"
-  * On first launch, you may need to copy the udev rules from `/opt/wch/rules/` into your **host's** `/etc/udev/rules.d/` directory
-  * Then, reload the rules using `sudo udevadm control --reload-rules` and `sudo udevadm trigger`.
+  * On first launch, you may need to install some udev rules on your host machine. Copy the files to your workspace by running `setup-devcontainer` inside the container.
+  * Re-open the workspace on your host and run the `install-rules` script inside the `.vscode/setup` folder.
+
+        cd .vscode/setup
+        sudo ./install-rules
+
   * Afterwards, restart the devcontainer.
-* If prompted, select the "**GCC x.x riscv-none-embed**" CMake Kit. 
+* If prompted, select the "**\[unspecified\]**" CMake Kit. 
 * Run "**CMake: Configure**"
 * Build using "**CMake: Build [F7]**"
 * Open a new terminal and launch the serial monitor:
@@ -68,11 +72,21 @@ This project contains a simple set of modules to get the MCU running in a minima
 * Continue execution once the breakpoint in `main()` is reached.
 * Type `?` in the serial monitor Terminal tab to show available commands.
 
-> **Note**
-> If you want to use the EEPROM demo, remove the comment at the start of the `#define USE_EEPROM_DEMO` line at the top of `main.c`. The demo is disabled by default.
+If you want to use the EEPROM demo, remove the comment at the start of the `#define USE_EEPROM_DEMO` line at the top of `main.c`. The demo is disabled by default.
 
-> **Note**
-> If the debugger fails to program the target device, try updating the firmware of your debugger. The `wchisp` utility is included in the package, and compatible firmware files are provided in the `/opt/wch/firmware` directory inside the container. See the [WCH-Link User Manual](https://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html) for more information.
+### WCH-Link Firmware Update
+If the debugger fails to program the target device, try updating the firmware of your debugger. The `wchisp` utility is included in the package, and compatible firmware files are provided in the `/opt/wch/firmware` directory inside the container. See the [WCH-Link User Manual](https://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html) for more information.
+
+In order to update the on-board debugger on a CH32V103R-R1-1v1 eval board, follow the firmware update procedure:
+* Disconnect the board from USB
+* Short-circuit the pads of `J1` usind pliers
+* Re-connect the board via USB
+* (WSL only) Re-attach the CH549 device to WSL
+* Flash the firmware file
+
+      wchisp flash /opt/wch/firmware/WCH-Link_APP_IAP_RV.bin
+
+* Restart the board
 
 ## Licensing
 
