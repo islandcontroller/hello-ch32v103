@@ -19,7 +19,7 @@ set(CMAKE_EXECUTABLE_SUFFIX ${TARGET_EXECUTABLE_SUFFIX})
 #- Common build setup ----------------------------------------------------------
 # Toolchain common options
 set(MACHINE_OPTIONS
-	-march=rv32i
+	-march=rv32imac
 	-mabi=ilp32
 )
 
