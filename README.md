@@ -11,8 +11,6 @@ This project contains a simple set of modules to get the MCU running in a minima
   - ADC1 internal temperature sensor and Vrefint readout
   - I2C2 interface with 24C64 EEPROM read and write access
 
-**:information_source: See [`README.vscode.md`](README.vscode.md) for VSCode setup information! :information_source:**
-
 ## Requirements
 
 * Hardware
@@ -20,8 +18,10 @@ This project contains a simple set of modules to get the MCU running in a minima
   * (optional) Female-female jumper wires
   * (optional) AT24C64 EEPROM IC + Solderless breadboard + 2x 10k Resistors
 * Software
-  * [MounRiver Studio Community](http://www.mounriver.com/)
-  * Serial terminal program, e.g. [PuTTy](https://www.putty.org/) or minicom
+  * Linux OS or WSL installation
+  * [Docker Engine](https://docs.docker.com/engine/install/debian/) (running within WSL if applicable)
+  * VSCode [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension
+  * (WSL only) [usbipd-win](https://learn.microsoft.com/en-us/windows/wsl/connect-usb)
 
 ## Hardware Setup (optional)
 
@@ -48,15 +48,46 @@ This project contains a simple set of modules to get the MCU running in a minima
   ```
   git clone --recursive https://github.com/islandcontroller/hello-ch32v103
   ```
-* Load this project in **MounRiver Studio Community** and build the executable
-* Open a serial terminal on the WCH-Link programmer's VCP (**115200 Baud, 8N1**)
-* Flash the firmware to the MCU using the provided `.launch` script
-* Resume execution once breakpoint in `main()` is reached
-* Press `?` in the serial terminal to show available commands
+* Open the folder in VSCode
+* Connect WCH-Link debug probe
+  * (WSL only) attach to WSL using `usbipd attach --wsl --busid <...>`. **This needs to be completed before starting the Dev Container.**
+* Run the command "**Dev Containers: Reopen in Container**"
+  * Check if the board is recognised as a connected USB device by running `lsusb`.
+  * On first launch, you may need to install some udev rules on your host machine. Copy the files to your workspace by running `setup-devcontainer` inside the container.
+  * Re-open the workspace on your host and run the `install-rules` script inside the `.vscode/setup` folder.
 
-### **Note**
+        cd .vscode/setup
+        sudo ./install-rules
+
+  * Afterwards, restart the devcontainer.
+* If prompted, select the "**\[unspecified\]**" CMake Kit. 
+* Run "**CMake: Configure**"
+* Build using "**CMake: Build [F7]**"
+* Open a new terminal and launch the serial monitor:
+
+      cu -l /dev/ttyACM0 -s 115200
+
+  **To close the connection later on, press ESC/ENTER, type `~.` (tilde, dot) and wait for 3 seconds.**
+
+* Start debugging using "**Debug: Start Debugging [F5]**"
+* Continue execution once the breakpoint in `main()` is reached.
+* Type `?` in the serial monitor Terminal tab to show available commands.
 
 If you want to use the EEPROM demo, remove the comment at the start of the `#define USE_EEPROM_DEMO` line at the top of `main.c`. The demo is disabled by default.
+
+### WCH-Link Firmware Update
+If the debugger fails to program the target device, try updating the firmware of your debugger. The `wchisp` utility is included in the package, and compatible firmware files are provided in the `/opt/wch/firmware` directory inside the container. See the [WCH-Link User Manual](https://www.wch-ic.com/downloads/WCH-LinkUserManual_PDF.html) for more information.
+
+In order to update the on-board debugger on a CH32V103R-R1-1v1 eval board, follow the firmware update procedure:
+* Disconnect the board from USB
+* Short-circuit the pads of `J1` usind pliers
+* Re-connect the board via USB
+* (WSL only) Re-attach the CH549 device to WSL
+* Flash the firmware file
+
+      wchisp flash /opt/wch/firmware/WCH-Link_APP_IAP_RV.bin
+
+* Restart the board
 
 ## Licensing
 
