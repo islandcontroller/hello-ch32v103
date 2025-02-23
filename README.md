@@ -60,7 +60,7 @@ This project contains a simple set of modules to get the MCU running in a minima
         sudo ./install-rules
 
   * Afterwards, restart the devcontainer.
-* If prompted, select the "**\[unspecified\]**" CMake Kit. 
+* If prompted, select the "`WCH RISC-V Toolchain x.x`" CMake Kit. 
 * Run "**CMake: Configure**"
 * Build using "**CMake: Build [F7]**"
 * Open a new terminal and launch the serial monitor:
